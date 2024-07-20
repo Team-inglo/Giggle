@@ -1,0 +1,61 @@
+package com.inglo.giggle.controller;
+
+import com.inglo.giggle.annotation.UserId;
+import com.inglo.giggle.constants.Constants;
+import com.inglo.giggle.dto.global.ResponseDto;
+import com.inglo.giggle.dto.request.AuthSignUpDto;
+import com.inglo.giggle.dto.request.OauthLoginDto;
+import com.inglo.giggle.dto.response.JwtTokenDto;
+import com.inglo.giggle.exception.CommonException;
+import com.inglo.giggle.exception.ErrorCode;
+import com.inglo.giggle.service.AuthService;
+import com.inglo.giggle.utility.HeaderUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@Tag(name = "Auth", description = "인증 관련 API")
+@RequestMapping("/api/v1")
+public class AuthController {
+    private final AuthService authService;
+
+    @GetMapping("/auth/email-duplicate")
+    @Operation(summary = "이메일 중복 확인", description = "이메일 중복을 확인합니다.")
+    public ResponseDto<?> checkDuplicate(
+            @RequestParam(value = "email") String email
+    ) {
+        return ResponseDto.ok(authService.checkDuplicate(email));
+    }
+
+    @PostMapping("/auth/sign-up")
+    @Operation(summary = "Default 회원가입", description = "Default 회원가입을 진행합니다.")
+    public ResponseDto<?> signUp(
+            @RequestBody @Valid AuthSignUpDto authSignUpDto
+            ) {
+        authService.signUp(authSignUpDto);
+
+        return ResponseDto.ok(null);
+    }
+
+    @PostMapping("/auth/reissue")
+    @Operation(summary = "Access 토큰 재발급", description = "Access 토큰을 재발급합니다.")
+    public ResponseDto<?> reissue(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @UserId Long userId) {
+        String refreshToken = HeaderUtil.refineHeader(request, Constants.AUTHORIZATION_HEADER, Constants.BEARER_PREFIX)
+                .orElseThrow(() -> new CommonException(ErrorCode.MISSING_REQUEST_HEADER));
+
+        JwtTokenDto jwtTokenDto = authService.reissue(userId, refreshToken);
+
+        return ResponseDto.ok(jwtTokenDto);
+    }
+
+}
