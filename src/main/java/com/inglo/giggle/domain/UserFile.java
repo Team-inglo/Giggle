@@ -38,4 +38,18 @@ public class UserFile {
         this.registrationFileUrl = registrationFileUrl;
         this.createdAt = LocalDateTime.now();
     }
+
+    public static UserFile signUp(User user) {
+        return UserFile.builder()
+                .user(user)
+                .build();
+    }
+
+    public void uploadPassportFile(String passportFileUrl) {
+        this.passportFileUrl = passportFileUrl;
+    }
+
+    public void uploadRegistrationFile(String registrationFileUrl) {
+        this.registrationFileUrl = registrationFileUrl;
+    }
 }
