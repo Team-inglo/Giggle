@@ -1,12 +1,12 @@
 package com.inglo.giggle.service;
 
 import com.inglo.giggle.domain.User;
+import com.inglo.giggle.domain.UserFile;
 import com.inglo.giggle.dto.request.AuthSignUpDto;
-import com.inglo.giggle.dto.request.OauthLoginDto;
 import com.inglo.giggle.dto.response.JwtTokenDto;
-import com.inglo.giggle.dto.type.ERole;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
+import com.inglo.giggle.repository.UserFileRepository;
 import com.inglo.giggle.repository.UserRepository;
 import com.inglo.giggle.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,45 +14,24 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final UserFileRepository userFileRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public boolean checkDuplicate(String email) {
         return userRepository.existsBySerialId(email);
     }
 
-    public void signUp(AuthSignUpDto authSignUpDto) {
-        userRepository.save(
+    @Transactional
+    public void signUp(AuthSignUpDto authSignUpDto) { // 아이디 비밀번호 등록 시, User와 UserFile을 생성
+        User user = userRepository.save(
                 User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()))
         );
-    }
-    @Transactional
-    public JwtTokenDto login(OauthLoginDto userLoginDto) {
-        User user;
-        boolean isNewUser = false;
-
-        Optional<User> existingUser = userRepository.findBySerialId(userLoginDto.serialId());
-
-        if (existingUser.isPresent()) {
-            user = existingUser.get();
-        } else {
-            user = userRepository.save(User.signUp(userLoginDto.serialId(), userLoginDto.provider()));
-            isNewUser = true;
-        }
-
-        JwtTokenDto jwtTokenDto = jwtUtil.generateTokens(user.getId(), ERole.USER);
-
-        if (isNewUser || !jwtTokenDto.refreshToken().equals(user.getRefreshToken())) {
-            userRepository.updateRefreshTokenAndLoginStatus(user.getId(), jwtTokenDto.refreshToken(), true);
-        }
-
-        return jwtTokenDto;
+        userFileRepository.save(UserFile.signUp(user));
     }
 
     @Transactional

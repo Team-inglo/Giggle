@@ -16,6 +16,7 @@ public enum ErrorCode {
     NOT_FOUND_LOGIN_USER(40401, HttpStatus.NOT_FOUND, "로그인한 사용자가 존재하지 않습니다."),
     NOT_FOUND_AUTHORIZATION_HEADER(40401, HttpStatus.NOT_FOUND, "Authorization 헤더가 존재하지 않습니다."),
     NOT_FOUND_USER(40401, HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
+    NOT_FOUND_USER_FILE(40402, HttpStatus.NOT_FOUND, "해당 사용자 파일이 존재하지 않습니다."),
 
     // Invalid Argument Error
     MISSING_REQUEST_PARAMETER(40000, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
@@ -26,6 +27,11 @@ public enum ErrorCode {
     BAD_REQUEST_PARAMETER(40005, HttpStatus.BAD_REQUEST, "잘못된 요청 파라미터입니다."),
     BAD_REQUEST_JSON(40006, HttpStatus.BAD_REQUEST, "잘못된 JSON 형식입니다."),
     SEARCH_SHORT_LENGTH_ERROR(40007, HttpStatus.BAD_REQUEST, "검색어는 2글자 이상이어야 합니다."),
+    INVALID_PASSPORT_FILE(40008, HttpStatus.BAD_REQUEST, "유효하지 않은 여권 파일입니다."),
+    INVALID_REGISTRATION_FILE(40009, HttpStatus.BAD_REQUEST, "유효하지 않은 외국인 등록증 파일입니다."),
+    INVALID_TOPIK_FILE(40010, HttpStatus.BAD_REQUEST, "유효하지 않은 토픽 파일입니다."),
+    INVALID_SOCIAL_INTEGRATION_PROGRAM_FILE(40011, HttpStatus.BAD_REQUEST, "유효하지 않은 사회통합프로그램 파일입니다."),
+    INVALID_SEJONG_INSTITUTE_FILE(40012, HttpStatus.BAD_REQUEST, "유효하지 않은 세종학당 파일입니다."),
 
 
     // Access Denied Error
@@ -47,6 +53,7 @@ public enum ErrorCode {
     // Internal Server Error
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러입니다."),
     UPLOAD_FILE_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패하였습니다.");
+
 
     private final Integer code;
     private final HttpStatus httpStatus;
