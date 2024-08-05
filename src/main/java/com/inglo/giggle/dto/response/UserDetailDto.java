@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Builder
@@ -48,7 +49,7 @@ public record UserDetailDto(
                     .socialIntegrationProgramScore(user.getSocialIntegrationProgramScore())
                     .sejongInstituteScore(user.getSejongInstituteScore())
                     .gpa(user.getGpa())
-                    .periodOfStay("D-" + ChronoUnit.DAYS.between(user.getStartDay(), user.getEndDay()))
+                    .periodOfStay("D-" + ChronoUnit.DAYS.between(LocalDateTime.now(),user.getEndDay()))
                     .build();
         }
 }
