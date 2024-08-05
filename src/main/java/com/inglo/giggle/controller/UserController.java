@@ -2,7 +2,7 @@ package com.inglo.giggle.controller;
 
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.dto.global.ResponseDto;
-import com.inglo.giggle.dto.request.updateUserDto;
+import com.inglo.giggle.dto.request.UpdateUserDto;
 import com.inglo.giggle.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,9 +50,9 @@ public class UserController {
     @Operation(summary = "거주지 수정", description = "본인 정보 중 유일하게 수정 가능한 거주지를 업데이트합니다.")
     public ResponseDto<?> updateAddress(
             @UserId Long userId,
-            @RequestBody updateUserDto updateUserDto
+            @RequestBody UpdateUserDto updateUserDto
     ) {
-        userService.updateAddress(userId, updateUserDto.address());
+        userService.updateUser(userId, updateUserDto);
         return ResponseDto.ok(null);
     }
 

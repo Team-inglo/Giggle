@@ -2,6 +2,7 @@ package com.inglo.giggle.domain;
 
 import com.inglo.giggle.annotation.Date;
 import com.inglo.giggle.dto.request.AuthSignUpDto;
+import com.inglo.giggle.dto.request.UpdateUserDto;
 import com.inglo.giggle.dto.type.EProvider;
 import com.inglo.giggle.dto.type.ERole;
 import jakarta.persistence.*;
@@ -151,8 +152,11 @@ public class User {
                 .role(ERole.USER)
                 .build();
     }
-    public void registerAddress(String address){
-        this.address = address;
+    public void updateUser(UpdateUserDto updateUserDto) {
+        this.address = updateUserDto.address();
+        this.gpa = updateUserDto.gpa();
+        this.startDay = updateUserDto.startDay();
+        this.endDay = updateUserDto.endDay();
     }
 
     public void registerPassport(String passportNumber, String name, String sex, String dateOfBirth, String nationality, String passportIssueDate, String passportExpiryDate) {

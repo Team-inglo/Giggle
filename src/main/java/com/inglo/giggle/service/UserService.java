@@ -3,6 +3,7 @@ package com.inglo.giggle.service;
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.domain.User;
 import com.inglo.giggle.domain.UserFile;
+import com.inglo.giggle.dto.request.UpdateUserDto;
 import com.inglo.giggle.dto.response.UserDetailDto;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
@@ -39,11 +40,11 @@ public class UserService {
     }
 
     @Transactional
-    public void updateAddress(@UserId Long userId, String address) {
+    public void updateUser(@UserId Long userId, UpdateUserDto updateUserDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
 
-        user.registerAddress(address);
+        user.updateUser(updateUserDto);
     }
 
     @Transactional
