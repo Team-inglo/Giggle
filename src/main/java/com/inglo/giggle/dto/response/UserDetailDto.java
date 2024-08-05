@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 @Builder
 @Schema(name = "UserDetailDto", description = "유저 상세 정보 조회 Dto")
 public record UserDetailDto(
@@ -24,7 +27,9 @@ public record UserDetailDto(
         String registrationIssueDate,
         String topikScore,
         String socialIntegrationProgramScore,
-        String sejongInstituteScore
+        String sejongInstituteScore,
+        String gpa,
+        String periodOfStay
 ) {
         public static UserDetailDto fromEntity(User user) {
             return UserDetailDto.builder()
@@ -43,6 +48,8 @@ public record UserDetailDto(
                     .topikScore(user.getTopikScore())
                     .socialIntegrationProgramScore(user.getSocialIntegrationProgramScore())
                     .sejongInstituteScore(user.getSejongInstituteScore())
+                    .gpa(user.getGpa())
+                    .periodOfStay("D-" + ChronoUnit.DAYS.between(LocalDateTime.now(),user.getEndDay()))
                     .build();
         }
 }

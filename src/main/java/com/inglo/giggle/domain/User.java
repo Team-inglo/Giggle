@@ -1,5 +1,6 @@
 package com.inglo.giggle.domain;
 
+import com.inglo.giggle.annotation.Date;
 import com.inglo.giggle.dto.request.AuthSignUpDto;
 import com.inglo.giggle.dto.type.EProvider;
 import com.inglo.giggle.dto.type.ERole;
@@ -44,47 +45,58 @@ public class User {
     @Column(name = "address")
     private String address="";
 
+    @Column(name = "gpa")
+    private String gpa="0";
+
+    @Column(name = "startDay")
+    @Date
+    private LocalDateTime startDay= null;
+
+    @Column(name = "endDay")
+    @Date
+    private LocalDateTime endDay= null;
+
     /* User Info - passport */
     @Column(name = "passport_number")
-    private String passportNumber="";
+    private String passportNumber="None";
 
     @Column(name = "name")
-    private String name="";
+    private String name="None";
 
     @Column(name = "sex")
-    private String sex="";
+    private String sex="None";
 
     @Column(name = "date_of_birth")
-    private String dateOfBirth="";
+    private String dateOfBirth="None";
 
     @Column(name = "nationality")
-    private String nationality="";
+    private String nationality="None";
 
     @Column(name = "passport_issue_date")
-    private String passportIssueDate="";
+    private String passportIssueDate="None";
 
     @Column(name = "passport_expiry_date")
-    private String passportExpiryDate="";
+    private String passportExpiryDate="None";
 
     /* User Info - registration */
     @Column(name = "registration_number")
-    private String registrationNumber="";
+    private String registrationNumber="None";
 
     @Column(name = "status_of_residence")
-    private String statusOfResidence="";
+    private String statusOfResidence="None";
 
     @Column(name = "registration_issue_date")
-    private String registrationIssueDate="";
+    private String registrationIssueDate="None";
 
     /* User Info - User Spec */
     @Column(name = "topik_score")
-    private String topikScore = "";
+    private String topikScore = "0";
 
     @Column(name = "social_integration_program_score")
-    private String socialIntegrationProgramScore = "";
+    private String socialIntegrationProgramScore = "0";
 
     @Column(name = "sejong_institute_score")
-    private String sejongInstituteScore = "";
+    private String sejongInstituteScore = "0";
 
     /* User Status */
     @Column(name = "is_login", columnDefinition = "TINYINT(1)")

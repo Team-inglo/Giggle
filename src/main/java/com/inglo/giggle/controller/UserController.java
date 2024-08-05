@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("")
-    @Operation(summary = "본인 정보 조회", description = "본인 정보를 조회합니다.")
+    @Operation(summary = "본인 정보 조회(홈화면 조회)", description = "본인 정보를 조회합니다.")
     public ResponseDto<?> readUsers(
             @UserId Long userId
     ) {
