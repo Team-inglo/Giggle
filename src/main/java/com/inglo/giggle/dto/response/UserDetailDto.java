@@ -11,32 +11,35 @@ import lombok.Builder;
 @Schema(name = "UserDetailDto", description = "유저 상세 정보 조회 Dto")
 public record UserDetailDto(
         Long id,
-        String name,
         String address,
         String passportNumber,
-        String statusOfResidence,
-        String periodOfStay,
-        String passportIssueDate,
+        String name,
+        String sex,
+        String dateOfBirth,
         String nationality,
-        String registrationIssueDate,
+        String passportIssueDate,
+        String passportExpiryDate,
         String registrationNumber,
+        String statusOfResidence,
+        String registrationIssueDate,
         String topikScore,
         String socialIntegrationProgramScore,
         String sejongInstituteScore
-
 ) {
         public static UserDetailDto fromEntity(User user) {
             return UserDetailDto.builder()
                     .id(user.getId())
-                    .name(user.getName())
                     .address(user.getAddress())
                     .passportNumber(user.getPassportNumber())
-                    .statusOfResidence(user.getStatusOfResidence())
-                    .periodOfStay(user.getPeriodOfStay())
-                    .passportIssueDate(user.getPassportIssueDate())
+                    .name(user.getName())
+                    .sex(user.getSex())
+                    .dateOfBirth(user.getDateOfBirth())
                     .nationality(user.getNationality())
-                    .registrationIssueDate(user.getRegistrationIssueDate())
+                    .passportIssueDate(user.getPassportIssueDate())
+                    .passportExpiryDate(user.getPassportExpiryDate())
                     .registrationNumber(user.getRegistrationNumber())
+                    .statusOfResidence(user.getStatusOfResidence())
+                    .registrationIssueDate(user.getRegistrationIssueDate())
                     .topikScore(user.getTopikScore())
                     .socialIntegrationProgramScore(user.getSocialIntegrationProgramScore())
                     .sejongInstituteScore(user.getSejongInstituteScore())
