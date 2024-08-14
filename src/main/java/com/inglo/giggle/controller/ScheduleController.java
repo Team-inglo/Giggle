@@ -31,4 +31,21 @@ public class ScheduleController {
     ) {
         return ResponseDto.ok(scheduleService.getSchedule(userId, year, month));
     }
+
+    @PatchMapping("/{scheduleId}")
+    public ResponseDto<?> updateSchedule(
+            @PathVariable Long scheduleId,
+            @RequestBody ScheduleCreateDto scheduleCreateDto
+    ) {
+        scheduleService.updateSchedule(scheduleId, scheduleCreateDto);
+        return ResponseDto.ok(null);
+    }
+
+    @DeleteMapping("/{scheduleId}")
+    public ResponseDto<?> deleteSchedule(
+            @PathVariable Long scheduleId
+    ) {
+        scheduleService.deleteSchedule(scheduleId);
+        return ResponseDto.ok(null);
+    }
 }

@@ -43,4 +43,9 @@ public class Schedule {
         this.endAt = endAt;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateSchedule(LocalDateTime startAt, LocalDateTime endAt) {
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
 }

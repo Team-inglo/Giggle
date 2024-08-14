@@ -69,4 +69,26 @@ public class ScheduleService {
         result.put("salaries", salaryMap);
         return result;
     }
+    @Transactional
+    public void updateSchedule(Long scheduleId, ScheduleCreateDto scheduleCreateDto) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
+        try {
+            schedule.updateSchedule(
+                    scheduleCreateDto.startAt(),
+                    scheduleCreateDto.endAt()
+            );
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void deleteSchedule(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
+        try {
+            scheduleRepository.delete(schedule);
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
