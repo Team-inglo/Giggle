@@ -30,4 +30,21 @@ public class PartTimeController {
     ) {
         return ResponseDto.ok(partTimeService.getPartTime(partTimeId));
     }
+
+    @PatchMapping("/{partTimeId}")
+    public ResponseDto<?> updatePartTime(
+            @PathVariable Long partTimeId,
+            @RequestBody PartTimeCreateDto partTimeCreateDto
+    ) {
+        partTimeService.updatePartTime(partTimeId, partTimeCreateDto);
+        return ResponseDto.ok(null);
+    }
+
+    @DeleteMapping("/{partTimeId}")
+    public ResponseDto<?> deletePartTime(
+            @PathVariable Long partTimeId
+    ) {
+        partTimeService.deletePartTime(partTimeId);
+        return ResponseDto.ok(null);
+    }
 }

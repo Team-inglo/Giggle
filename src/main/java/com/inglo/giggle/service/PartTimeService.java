@@ -34,10 +34,27 @@ public class PartTimeService {
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
-
     public PartTimeDto getPartTime(Long partTimeId) {
         PartTime partTime = partTimeRepository.findById(partTimeId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
 
         return PartTimeDto.fromEntity(partTime);
+    }
+    @Transactional
+    public void updatePartTime(Long partTimeId, PartTimeCreateDto partTimeCreateDto) {
+        PartTime partTime = partTimeRepository.findById(partTimeId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
+        try {
+            partTime.updatePartTime(partTimeCreateDto.name(), partTimeCreateDto.hourlyRate(), partTimeCreateDto.color());
+        } catch(Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Transactional
+    public void deletePartTime(Long partTimeId) {
+        PartTime partTime = partTimeRepository.findById(partTimeId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
+        try {
+            partTimeRepository.delete(partTime);
+        } catch(Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 }
