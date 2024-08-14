@@ -19,6 +19,10 @@ public class Schedule {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_time_id")
     private PartTime partTime;
 
@@ -32,7 +36,8 @@ public class Schedule {
     LocalDateTime createdAt;
 
     @Builder
-    public Schedule(PartTime partTime, LocalDateTime startAt, LocalDateTime endAt) {
+    public Schedule(User user, PartTime partTime, LocalDateTime startAt, LocalDateTime endAt) {
+        this.user = user;
         this.partTime = partTime;
         this.startAt = startAt;
         this.endAt = endAt;
