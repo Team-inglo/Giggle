@@ -23,13 +23,13 @@ public class Document {
     @Column(name = "type", nullable = false)
     private Integer type;
 
-    @Column(name = "template_id", nullable = false)
-    private Long templateId;
+    @Column(name = "document_id", nullable = false)
+    private Long documentId;
 
     @Builder
     public Document(Apply apply, Integer type, Long templateId){
         this.apply = apply;
         this.type = type;
-        this.templateId = templateId;
+        this.documentId = templateId;
     }
 }
