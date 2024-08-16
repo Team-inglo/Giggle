@@ -35,7 +35,7 @@ public class DocumentService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
-    public String requestSinature(List<RequestSignatureDto> request, Integer docs_number) {
+    public String requestSinature(List<RequestSignatureDto> request, Integer docs_number, Long userId) {
         List<WebClientRequestDto.ParticipantMapping> participantMappings = request.stream()
                 .map(req -> new WebClientRequestDto.ParticipantMapping(
                         false,

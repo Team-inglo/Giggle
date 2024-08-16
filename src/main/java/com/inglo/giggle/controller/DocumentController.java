@@ -1,8 +1,10 @@
 package com.inglo.giggle.controller;
 
+import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.response.DocumentLogDto;
 import com.inglo.giggle.service.DocumentService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +19,14 @@ public class DocumentController {
     private final DocumentService documentService;
 
     @PostMapping("/request")
-    @Tag(name = "서명요청", description = "서명요청 API")
-    public String requestPartTimeEmploymentPermit(
+    @Operation(summary = "서명 요청", description = "서명 요청")
+    public String requestSignature(
             @RequestBody List<RequestSignatureDto> request,
-            @RequestParam Integer docs_number
+            @RequestParam Integer docs_number,
+            @UserId Long userId
     ) {
-        return documentService.submitDocument(request, docs_number);
-    }
+        String embeddedUrl = documentService.requestSinature(request, docs_number, userId);
 
-    @GetMapping("/status")
-    @Tag(name = "요청조회", description = "요청조회 API")
-    public DocumentLogDto getDocumentsStatus(
-    ) {
-        return null;
+        return embeddedUrl;
     }
 }
