@@ -24,12 +24,12 @@ public class Document {
     private Integer type;
 
     @Column(name = "document_id", nullable = false)
-    private Long documentId;
+    private String documentId;
 
     @Builder
-    public Document(Apply apply, Integer type, Long templateId){
+    public Document(Apply apply, Integer type, String documentId){
         this.apply = apply;
         this.type = type;
-        this.documentId = templateId;
+        this.documentId = documentId;
     }
 }

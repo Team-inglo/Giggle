@@ -1,8 +1,13 @@
 package com.inglo.giggle.service;
 
+import com.inglo.giggle.domain.Document;
 import com.inglo.giggle.dto.request.ParticipantMappingRequestDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
+import com.inglo.giggle.dto.request.DocumentLogRequestDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
+import com.inglo.giggle.dto.type.EventType;
+import com.inglo.giggle.exception.CommonException;
+import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.DocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +35,7 @@ public class DocumentService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
-    public WebClientResponseDto submitDocument(List<ParticipantMappingRequestDto> request, Integer docs_number) {
+    public String submitDocument(List<ParticipantMappingRequestDto> request, Integer docs_number) {
         List<WebClientRequestDto.ParticipantMapping> participantMappings = request.stream()
                 .map(req -> new WebClientRequestDto.ParticipantMapping(
                         false,
@@ -85,6 +90,41 @@ public class DocumentService {
                 .bodyToMono(WebClientResponseDto.class)
                 .block();
 
-        return responseDto;
+        return "url";
     }
+
+    // 모두싸인에서 보내는 post용 api
+    public void postDocumentLog(DocumentLogRequestDto request) {
+        // request에서 document id로 요청 파악
+        Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
+        EventType eventType = EventType.valueOf(request.event().type()); // eventype get
+        handleEvent(eventType, document);
+    }
+
+    public void handleEvent(EventType eventType, Document document) {
+        switch (eventType) {
+            case DOCUMENT_STARTED:
+                // 서명 요청 시작
+                break;
+            case DOCUMENT_SIGNED:
+                // 서명에 입력
+                break;
+            case DOCUMENT_ALL_SIGNED:
+                // 문서의 모든 참여자가 서명함.
+                document.getApply().addStep(); // step 1 증가
+                break;
+            case DOCUMENT_REJECTED:
+                // 참여자가 서명 요청을 거절함.
+                break;
+            case DOCUMENT_REQUEST_CANCELED:
+                // 문서의 서명 요청이 취소됨.
+                break;
+            case DOCUMENT_SIGNGING_CANCELED:
+                // 참여자가 입력한 서명을 취소함.
+                break;
+            default:
+                throw new CommonException(ErrorCode.INVALID_EVENT_TYPE);
+        }
+    }
+
 }

@@ -44,6 +44,10 @@ public enum ErrorCode {
     TOKEN_GENERATION_ERROR(40106, HttpStatus.UNAUTHORIZED, "토큰 생성에 실패하였습니다."),
     TOKEN_UNKNOWN_ERROR(40107, HttpStatus.UNAUTHORIZED, "알 수 없는 토큰입니다."),
 
+    // Document Error
+    NOT_FOUND_DOCUMENT(40600, HttpStatus.NOT_FOUND, "존재하지 않는 document입니다."),
+    INVALID_EVENT_TYPE(40601, HttpStatus.BAD_REQUEST, "잘못된 event type입니다."),
+
     // Internal Server Error
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러입니다."),
     UPLOAD_FILE_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패하였습니다.");

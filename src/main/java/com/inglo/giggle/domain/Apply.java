@@ -44,5 +44,8 @@ public class Apply {
         this.createdAt = createdAt;
     }
 
+    public void addStep(){
+        this.step++;
+    }
 
 }
