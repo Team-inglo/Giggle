@@ -2,7 +2,6 @@ package com.inglo.giggle.controller;
 
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
-import com.inglo.giggle.dto.response.DocumentLogDto;
 import com.inglo.giggle.service.DocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
