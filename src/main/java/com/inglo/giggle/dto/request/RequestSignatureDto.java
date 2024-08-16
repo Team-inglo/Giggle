@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-public record ParticipantMappingRequestDto(
+public record RequestSignatureDto(
         @JsonProperty("signingMethod") @Schema(description = "서명 방법", required = true)
         @NotNull(message = "서명 방법은 null이 될 수 없습니다.")
         WebClientRequestDto.SigningMethod signingMethod,

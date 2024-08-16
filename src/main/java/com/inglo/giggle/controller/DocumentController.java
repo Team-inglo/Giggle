@@ -1,9 +1,7 @@
 package com.inglo.giggle.controller;
 
-import com.inglo.giggle.dto.request.ParticipantMappingRequestDto;
-import com.inglo.giggle.dto.request.WebClientRequestDto;
+import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.response.DocumentLogDto;
-import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.service.DocumentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,7 @@ public class DocumentController {
     @PostMapping("/request")
     @Tag(name = "서명요청", description = "서명요청 API")
     public String requestPartTimeEmploymentPermit(
-            @RequestBody List<ParticipantMappingRequestDto> request,
+            @RequestBody List<RequestSignatureDto> request,
             @RequestParam Integer docs_number
     ) {
         return documentService.submitDocument(request, docs_number);

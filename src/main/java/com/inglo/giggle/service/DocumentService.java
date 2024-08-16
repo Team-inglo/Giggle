@@ -1,9 +1,9 @@
 package com.inglo.giggle.service;
 
 import com.inglo.giggle.domain.Document;
-import com.inglo.giggle.dto.request.ParticipantMappingRequestDto;
+import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
-import com.inglo.giggle.dto.request.DocumentLogRequestDto;
+import com.inglo.giggle.dto.request.WebHookRequestDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.dto.type.EventType;
 import com.inglo.giggle.exception.CommonException;
@@ -35,7 +35,7 @@ public class DocumentService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
-    public String submitDocument(List<ParticipantMappingRequestDto> request, Integer docs_number) {
+    public String requestSinature(List<RequestSignatureDto> request, Integer docs_number) {
         List<WebClientRequestDto.ParticipantMapping> participantMappings = request.stream()
                 .map(req -> new WebClientRequestDto.ParticipantMapping(
                         false,
@@ -90,11 +90,11 @@ public class DocumentService {
                 .bodyToMono(WebClientResponseDto.class)
                 .block();
 
-        return "url";
+        return "documentUrl";
     }
 
     // 모두싸인에서 보내는 post용 api
-    public void postDocumentLog(DocumentLogRequestDto request) {
+    public void requestWebHook(WebHookRequestDto request) {
         // request에서 document id로 요청 파악
         Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
         EventType eventType = EventType.valueOf(request.event().type()); // eventype get

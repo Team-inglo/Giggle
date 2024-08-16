@@ -3,7 +3,7 @@ package com.inglo.giggle.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-public record DocumentLogRequestDto(
+public record WebHookRequestDto(
         @JsonProperty("event") @Schema(description = "이벤트", required = true)
         Event event,
         @JsonProperty("document") @Schema(description = "문서", required = true)

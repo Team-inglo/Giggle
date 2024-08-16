@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Schema(name = "ApplyLogDto", description = "사용자 작성 서류 상태 확인")
-public record ApplyLogDto (
+public record UserApplyLogDto(
         @JsonProperty("logs")List<DocumentSpec> logs
         ){
     public record DocumentSpec(
