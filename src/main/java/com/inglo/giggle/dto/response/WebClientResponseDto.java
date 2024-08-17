@@ -50,7 +50,7 @@ public record WebClientResponseDto (
     ) {}
 
     public record Signing(
-            // Define the fields for Signing class as per the API response
+            // 현재 설정 상 빈 값
     ) {}
 
     public record File(

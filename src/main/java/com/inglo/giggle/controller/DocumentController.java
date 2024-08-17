@@ -21,10 +21,11 @@ public class DocumentController {
     @Operation(summary = "서명 요청", description = "서명 요청")
     public String requestSignature(
             @RequestBody List<RequestSignatureDto> request,
-            @RequestParam Integer docs_number,
+            @RequestParam String documentType,
+            @RequestParam Long announcementId,
             @UserId Long userId
     ) {
-        String embeddedUrl = documentService.requestSinature(request, docs_number, userId);
+        String embeddedUrl = documentService.requestSinature(request, documentType, announcementId, userId);
 
         return embeddedUrl;
     }

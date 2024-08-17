@@ -1,8 +1,11 @@
 package com.inglo.giggle.service;
 
+import com.inglo.giggle.domain.Announcement;
 import com.inglo.giggle.domain.Apply;
 import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.response.UserApplyLogDto;
+import com.inglo.giggle.dto.response.WebClientResponseDto;
+import com.inglo.giggle.dto.type.DocumentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.ApplyRepository;
@@ -37,4 +40,5 @@ public class ApplyService {
                 .logs(documentSpecs)
                 .build();
     }
+
 }

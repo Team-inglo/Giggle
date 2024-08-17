@@ -1,22 +1,31 @@
 package com.inglo.giggle.service;
 
+import com.inglo.giggle.domain.Announcement;
+import com.inglo.giggle.domain.Apply;
 import com.inglo.giggle.domain.Document;
+import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
 import com.inglo.giggle.dto.request.WebHookRequestDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
+import com.inglo.giggle.dto.type.DocumentType;
 import com.inglo.giggle.dto.type.EventType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
+import com.inglo.giggle.repository.AnnouncementRepository;
+import com.inglo.giggle.repository.ApplyRepository;
 import com.inglo.giggle.repository.DocumentRepository;
+import com.inglo.giggle.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,18 +33,18 @@ import java.util.stream.Collectors;
 public class DocumentService {
     @Value("${MODUSIGN_API_KEY}")
     private String MODUSIGN_API_KEY;
-    @Value("${TEMPLATE_ID_1}")
-    private String TEMPLATE_ID_1;
-    @Value("${TEMPLATE_ID_2}")
-    private String TEMPLATE_ID_2;
-    @Value("${TEMPLATE_ID_3}")
-    private String TEMPLATE_ID_3;
 
     private final DocumentRepository documentRepository;
+    private final UserRepository userRepository;
+    private final ApplyRepository applyRepository;
+    private final AnnouncementRepository announcementRepository;
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
-    public String requestSinature(List<RequestSignatureDto> request, Integer docs_number, Long userId) {
+    public String requestSinature(List<RequestSignatureDto> request, String documentType, Long announcementId, Long userId) {
+        // documentType 가져오기
+        DocumentType type = DocumentType.valueOf(documentType);
+
         List<WebClientRequestDto.ParticipantMapping> participantMappings = request.stream()
                 .map(req -> new WebClientRequestDto.ParticipantMapping(
                         false,
@@ -44,34 +53,18 @@ public class DocumentService {
                         "ko",
                         req.role(),
                         req.name(),
-                        "외국인 유학생이 아르바이트를 하기 위해 제출해야 하는 시간제 취업허가서입니다."
+                        type.getMessage()
                 ))
                 .collect(Collectors.toList());
 
         WebClientRequestDto.Document document = new WebClientRequestDto.Document(
                 participantMappings,
-                "시간제취업허가서"
+                type.getTitle()
         );
-
-        // docs_number에 따라 TEMPLATE_ID 선택
-        String templateId;
-        switch (docs_number) {
-            case 1: // 시간제 취업허가서
-                templateId = TEMPLATE_ID_1;
-                break;
-            case 2: // 근로 계약서
-                templateId = TEMPLATE_ID_2;
-                break;
-            case 3: // 통합 신청서
-                templateId = TEMPLATE_ID_3;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid docs_number: " + docs_number); // 예외처리 추가
-        }
 
         WebClientRequestDto requestDto = new WebClientRequestDto(
                 document,
-                templateId // template id 입력
+                type.getTemplateId() // template id
         );
 
         WebClientResponseDto responseDto = webClient.post()
@@ -81,16 +74,52 @@ public class DocumentService {
                 .header("content-type", "application/json")
                 .bodyValue(requestDto)
                 .retrieve()
-                .onStatus(status -> status != HttpStatus.CREATED, clientResponse -> {
-                    // Handle any status that is not 201 Created
-                    return clientResponse.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new RuntimeException("Unexpected status code: "
-                                    + clientResponse.statusCode() + ", body: " + errorBody)));
+                .onStatus(status -> status != HttpStatus.CREATED, res -> {
+                    return res.bodyToMono(String.class)
+                            .flatMap(errorBody -> Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR)));
                 })
                 .bodyToMono(WebClientResponseDto.class)
                 .block();
 
-        return "documentUrl";
+        addApply(responseDto, announcementId, type, userId);
+
+        return responseDto.id();
+    }
+
+    private void addApply(WebClientResponseDto request, Long announcementId, DocumentType documentType, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        Apply apply = Apply.builder()
+                .user(user)
+                .announcement(announcement)
+                .step(1)
+                .status(true)
+                .build();
+
+        try {
+            applyRepository.save(apply);
+            // document 추가
+            addDocumentForApply(apply, documentType, request.id());
+
+        } catch(DataAccessException e) {
+            throw new CommonException(ErrorCode.APPLY_DATABASE_ERROR);
+        }
+    }
+
+    // apply의 document 추가 method
+    private void addDocumentForApply(Apply apply, DocumentType documentType, String documentId) {
+        Document document = Document.builder()
+                .apply(apply)
+                .type(documentType)
+                .documentId(documentId)
+                .build();
+
+        try {
+            documentRepository.save(document);
+        } catch (DataAccessException e) {
+            throw new CommonException(ErrorCode.DOCUMENT_DATABASE_ERROR);
+        }
     }
 
     // 모두싸인에서 보내는 post용 api
@@ -101,7 +130,7 @@ public class DocumentService {
         handleEvent(eventType, document);
     }
 
-    public void handleEvent(EventType eventType, Document document) {
+    private void handleEvent(EventType eventType, Document document) {
         switch (eventType) {
             case DOCUMENT_STARTED:
                 // 서명 요청 시작
