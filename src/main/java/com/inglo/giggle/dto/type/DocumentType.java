@@ -19,5 +19,4 @@ public enum DocumentType {
     public String getMessage(DocumentType documentType) {
         return documentType.getMessage();
     }
-
 }

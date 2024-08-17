@@ -7,6 +7,7 @@ import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
 import com.inglo.giggle.dto.request.WebHookRequestDto;
+import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.dto.type.DocumentType;
 import com.inglo.giggle.dto.type.EventType;
@@ -81,9 +82,29 @@ public class DocumentService {
                 .bodyToMono(WebClientResponseDto.class)
                 .block();
 
+        String embeddedUrl = getembeddedUrl(responseDto.id(), responseDto.participants().get(0).id());
+
         addApply(responseDto, announcementId, type, userId);
 
-        return responseDto.id();
+        return embeddedUrl;
+    }
+
+    private String getembeddedUrl(String documentId, String participantId) {
+        String url = String.format("/documents/%s/participants/%s/embedded-view", documentId, participantId);
+
+        WebClientEmbeddedResponseDto responseDto = webClient.get()
+                .uri(url)
+                .header("accept", "application/json")
+                .header("authorization", MODUSIGN_API_KEY)
+                .retrieve()
+                .onStatus(status -> status != HttpStatus.OK, res -> {
+                    return res.bodyToMono(String.class)
+                            .flatMap(errorBody -> Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR)));
+                })
+                .bodyToMono(WebClientEmbeddedResponseDto.class)
+                .block();
+
+        return responseDto.embeddedUrl();
     }
 
     private void addApply(WebClientResponseDto request, Long announcementId, DocumentType documentType, Long userId) {
