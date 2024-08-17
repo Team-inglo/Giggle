@@ -22,10 +22,17 @@ public class ApplyService {
     private final UserRepository userRepository;
 
     // document log 조회 api
-    public UserApplyLogDto getUserApplyLogs(Long userId) {
+    public UserApplyLogDto getUserApplyLogs(Long userId, String status) {
+        Boolean statusValue = Boolean.parseBoolean(status);
+
         // User로 Apply 엔티티 리스트 가져오기
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         List<Apply> applies = applyRepository.findByUser(user);
+
+        // status가 동일한 것만 필터링
+        List<Apply> filteredApply = applies.stream()
+                .filter(apply -> apply.getStatus().equals(statusValue))
+                .toList();
 
         List<UserApplyLogDto.DocumentSpec> documentSpecs = applies.stream()
                 .map(apply -> new UserApplyLogDto.DocumentSpec(

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -15,16 +16,17 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "아르바이트 지원", description = "사용자의 아르바이트 지원 관련 API")
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/apply")
 public class ApplyController {
     private final ApplyService applyService;
 
-    @GetMapping("/status")
+    @GetMapping("/logs")
     @Operation(summary = "서류 상태 조회", description = "사용자가 작성한 서류의 상태 조회")
     public UserApplyLogDto getUserApplyLogs(
-            @UserId Long userId
+            @UserId Long userId,
+            @RequestParam String status
     ) {
-        UserApplyLogDto userApplyLogDto = applyService.getUserApplyLogs(userId);
+        UserApplyLogDto userApplyLogDto = applyService.getUserApplyLogs(userId, status);
         return userApplyLogDto;
     }
 }
