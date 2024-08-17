@@ -33,4 +33,5 @@ public class Document {
         this.type = type;
         this.documentId = documentId;
     }
+
 }

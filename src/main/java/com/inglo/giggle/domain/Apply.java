@@ -48,4 +48,12 @@ public class Apply {
         this.step++;
     }
 
+    public void advanceStep(Integer newStep){
+        this.step = newStep;
+    }
+
+    public void advanceStatus() {
+        this.status = false;
+    }
+
 }

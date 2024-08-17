@@ -140,7 +140,15 @@ public class DocumentService {
                 break;
             case DOCUMENT_ALL_SIGNED:
                 // 문서의 모든 참여자가 서명함.
-                document.getApply().addStep(); // step 1 증가
+                Apply apply = document.getApply();
+                apply.addStep(); // step 1 증가
+
+                if (apply.getStep() >= 8) {
+                    // 단계가 완료된 경우 status를 false로
+                    apply.advanceStatus();
+                }
+
+                applyRepository.save(apply);
                 break;
             case DOCUMENT_REJECTED:
                 // 참여자가 서명 요청을 거절함.
