@@ -2,6 +2,7 @@ package com.inglo.giggle.controller;
 
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
+import com.inglo.giggle.dto.request.WebHookRequestDto;
 import com.inglo.giggle.service.DocumentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,5 +29,13 @@ public class DocumentController {
         String embeddedUrl = documentService.requestSinature(request, documentType, announcementId, userId);
 
         return embeddedUrl;
+    }
+
+    @PostMapping("/webhook")
+    @Operation(summary = "웹훅용 api", description = "웹훅용 api")
+    public void requestSignature(
+            @RequestBody WebHookRequestDto request
+            ) {
+        documentService.requestWebHook(request);
     }
 }
