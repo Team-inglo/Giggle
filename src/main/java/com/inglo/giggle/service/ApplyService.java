@@ -22,8 +22,7 @@ public class ApplyService {
     private final UserRepository userRepository;
 
     // document log 조회 api
-    public UserApplyLogDto getUserApplyLogs(Long userId, String status) {
-        Boolean statusValue = Boolean.parseBoolean(status);
+    public UserApplyLogDto getUserApplyLogs(Long userId, Boolean status) {
 
         // User로 Apply 엔티티 리스트 가져오기
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
@@ -31,7 +30,7 @@ public class ApplyService {
 
         // status가 동일한 것만 필터링
         List<Apply> filteredApply = applies.stream()
-                .filter(apply -> apply.getStatus().equals(statusValue))
+                .filter(apply -> apply.getStatus().equals(status))
                 .toList();
 
         List<UserApplyLogDto.DocumentSpec> documentSpecs = applies.stream()
@@ -47,5 +46,6 @@ public class ApplyService {
                 .logs(documentSpecs)
                 .build();
     }
+
 
 }
