@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "아르바이트 지원", description = "사용자의 아르바이트 지원 관련 API")
-@RequestMapping("/api/v1/apply")
+@RequestMapping("/api/v1/applys")
 public class ApplyController {
     private final ApplyService applyService;
 
