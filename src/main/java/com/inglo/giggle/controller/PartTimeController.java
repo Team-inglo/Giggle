@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "아르바이트 기록", description = "사용자의 아르바이트 기록 관련 API")
-@RequestMapping("/api/v1/part-time")
+@RequestMapping("/api/v1/applicants/part-times")
 public class PartTimeController {
     private final PartTimeService partTimeService;
 
