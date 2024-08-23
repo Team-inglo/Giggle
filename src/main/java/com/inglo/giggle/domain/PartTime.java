@@ -44,8 +44,11 @@ public class PartTime {
     }
 
     public void updatePartTime(String partTimeName, Integer hourlyRate, String color){
-        this.partTimeName = partTimeName;
-        this.hourlyRate = hourlyRate;
-        this.color = color;
+        if(partTimeName != null)
+            this.partTimeName = partTimeName;
+        if(hourlyRate != null)
+            this.hourlyRate = hourlyRate;
+        if(color != null)
+            this.color = color;
     }
 }
