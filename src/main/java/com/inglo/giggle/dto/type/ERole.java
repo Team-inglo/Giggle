@@ -8,8 +8,8 @@ import java.util.Arrays;
 @Getter
 @RequiredArgsConstructor
 public enum ERole {
-    GUEST("GUEST", "ROLE_GUEST"),
-    USER("USER", "ROLE_USER");
+    APPLICANT("APPLICANT", "ROLE_APPLICANT"),
+    OWNER("OWNER", "ROLE_OWNER");
 
     private final String name;
     private final String securityName;
