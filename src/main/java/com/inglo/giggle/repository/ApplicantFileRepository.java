@@ -1,9 +1,13 @@
 package com.inglo.giggle.repository;
 
-import com.inglo.giggle.domain.UserFile;
+import com.inglo.giggle.domain.Applicant;
+import com.inglo.giggle.domain.ApplicantFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public interface UserFileRepository extends JpaRepository<UserFile, Long> {
+public interface ApplicantFileRepository extends JpaRepository<ApplicantFile, Long> {
+    Optional<ApplicantFile> findByApplicant(Applicant applicant);
 }
