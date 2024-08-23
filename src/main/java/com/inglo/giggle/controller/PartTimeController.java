@@ -24,6 +24,13 @@ public class PartTimeController {
         return ResponseDto.created(null);
     }
 
+    @GetMapping("")
+    public ResponseDto<?> getPartTimes(
+            @UserId Long userId
+    ) {
+        return ResponseDto.ok(partTimeService.getPartTimes(userId));
+    }
+
     @GetMapping("/{partTimeId}")
     public ResponseDto<?> getPartTime(
             @PathVariable Long partTimeId

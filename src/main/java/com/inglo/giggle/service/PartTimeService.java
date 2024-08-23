@@ -4,6 +4,7 @@ import com.inglo.giggle.domain.PartTime;
 import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.request.PartTimeCreateDto;
 import com.inglo.giggle.dto.response.PartTimeDto;
+import com.inglo.giggle.dto.response.PartTimeListDto;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.PartTimeRepository;
@@ -11,6 +12,8 @@ import com.inglo.giggle.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +36,12 @@ public class PartTimeService {
         } catch(Exception e) {
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public List<PartTimeListDto> getPartTimes(Long userId) {
+        return partTimeRepository.findAllByUserId(userId).stream()
+                .map(PartTimeListDto::fromEntity)
+                .toList();
     }
     public PartTimeDto getPartTime(Long partTimeId) {
         PartTime partTime = partTimeRepository.findById(partTimeId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
