@@ -24,7 +24,7 @@ public class Document {
     @Column(name = "type", nullable = false)
     private DocumentType type;
 
-    @Column(name = "document_id", nullable = false)
+    @Column(name = "document_tyoe_id", nullable = false)
     private String documentId;
 
     @Builder
