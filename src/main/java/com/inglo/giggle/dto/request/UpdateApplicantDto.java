@@ -5,7 +5,7 @@ import com.inglo.giggle.annotation.Date;
 
 import java.time.LocalDateTime;
 
-public record UpdateUserDto(
+public record UpdateApplicantDto(
         @JsonProperty("address")
         String address,
         @JsonProperty("gpa")
