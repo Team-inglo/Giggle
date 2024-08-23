@@ -34,6 +34,7 @@ public enum ErrorCode {
     INVALID_TOPIK_FILE(40010, HttpStatus.BAD_REQUEST, "유효하지 않은 토픽 파일입니다."),
     INVALID_SOCIAL_INTEGRATION_PROGRAM_FILE(40011, HttpStatus.BAD_REQUEST, "유효하지 않은 사회통합프로그램 파일입니다."),
     INVALID_SEJONG_INSTITUTE_FILE(40012, HttpStatus.BAD_REQUEST, "유효하지 않은 세종학당 파일입니다."),
+    START_AT_AFTER_END_AT(40013, HttpStatus.BAD_REQUEST, "시작일이 종료일보다 늦을 수 없습니다."),
 
 
     // Access Denied Error
