@@ -1,12 +1,17 @@
 package com.inglo.giggle.service;
 
+import com.inglo.giggle.domain.Applicant;
+import com.inglo.giggle.domain.Owner;
 import com.inglo.giggle.domain.User;
-import com.inglo.giggle.domain.UserFile;
+import com.inglo.giggle.domain.ApplicantFile;
 import com.inglo.giggle.dto.request.AuthSignUpDto;
 import com.inglo.giggle.dto.response.JwtTokenDto;
+import com.inglo.giggle.dto.type.ERole;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
-import com.inglo.giggle.repository.UserFileRepository;
+import com.inglo.giggle.repository.ApplicantFileRepository;
+import com.inglo.giggle.repository.ApplicantRepository;
+import com.inglo.giggle.repository.OwnerRepository;
 import com.inglo.giggle.repository.UserRepository;
 import com.inglo.giggle.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final UserFileRepository userFileRepository;
+    private final ApplicantRepository applicantRepository;
+    private final OwnerRepository ownerRepository;
+    private final ApplicantFileRepository applicantFileRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public boolean checkDuplicate(String email) {
@@ -28,10 +35,22 @@ public class AuthService {
 
     @Transactional
     public void signUp(AuthSignUpDto authSignUpDto) { // 아이디 비밀번호 등록 시, User와 UserFile을 생성
-        User user = userRepository.save(
-                User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()))
-        );
-        userFileRepository.save(UserFile.signUp(user));
+        ERole role = ERole.fromName(authSignUpDto.role());
+
+        if (role == ERole.APPLICANT) {
+            User user = userRepository.save(
+                    User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()), role)
+            );
+            Applicant applicant = applicantRepository.save(Applicant.signUp(user));
+            applicantFileRepository.save(ApplicantFile.signUp(applicant));
+        }
+        else {
+            User user = userRepository.save(
+                    User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()), role)
+            );
+            ownerRepository.save(Owner.signUp(user));
+        }
+
     }
 
     @Transactional

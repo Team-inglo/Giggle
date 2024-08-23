@@ -12,15 +12,15 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_file")
-public class UserFile {
+public class ApplicantFile {
     @Id
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "id", nullable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "applicant_id")
+    private Applicant applicant;
 
     @Column(name = "passport_file_url")
     private String passportFileUrl;
@@ -32,16 +32,18 @@ public class UserFile {
     private LocalDateTime createdAt;
 
     @Builder
-    public UserFile(User user, String passportFileUrl, String registrationFileUrl) {
-        this.user = user;
+    public ApplicantFile(Applicant applicant, String passportFileUrl, String registrationFileUrl) {
+        this.applicant = applicant;
         this.passportFileUrl = passportFileUrl;
         this.registrationFileUrl = registrationFileUrl;
         this.createdAt = LocalDateTime.now();
     }
 
-    public static UserFile signUp(User user) {
-        return UserFile.builder()
-                .user(user)
+    public static ApplicantFile signUp(Applicant applicant) {
+        return ApplicantFile.builder()
+                .applicant(applicant)
+                .passportFileUrl(null)
+                .registrationFileUrl(null)
                 .build();
     }
 

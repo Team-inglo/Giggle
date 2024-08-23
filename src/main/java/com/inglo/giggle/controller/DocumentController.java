@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "지원 서류", description = "사용자의 아르바이트 지원 서류 관련 API")
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/users")
 public class DocumentController {
     private final DocumentService documentService;
 }

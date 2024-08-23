@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "알림", description = "알림 관련 API")
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/users")
 public class NoticeController {
     private final NoticeService noticeService;
 }
