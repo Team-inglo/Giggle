@@ -90,7 +90,7 @@ public class DocumentService {
     }
 
     private String getembeddedUrl(String documentId, String participantId) {
-        String url = String.format("/documents/%s/participants/%s/embedded-view", documentId, participantId);
+        String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, ""); // redirect url 추가
 
         WebClientEmbeddedResponseDto responseDto = webClient.get()
                 .uri(url)

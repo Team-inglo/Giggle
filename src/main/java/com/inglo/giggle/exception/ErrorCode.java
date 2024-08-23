@@ -47,6 +47,7 @@ public enum ErrorCode {
     // Apply Error
     NOT_FOUND_APPLY(40700, HttpStatus.NOT_FOUND, "존재하지 않는 apply입니다."),
     APPLY_DATABASE_ERROR(40701, HttpStatus.BAD_REQUEST, "Apply 데이터 저장에 실패했습니다."),
+    INVALID_PARTTIME_STEP(40702, HttpStatus.NOT_FOUND, "일치하는 part time comment가 없습니다."),
 
     // Document Error
     NOT_FOUND_DOCUMENT(40600, HttpStatus.NOT_FOUND, "존재하지 않는 document입니다."),

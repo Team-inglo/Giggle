@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -34,6 +36,9 @@ public class Apply {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "apply", cascade = CascadeType.ALL)
+    private List<Document> documents = new ArrayList<>();
 
     @Builder
     public Apply(User user, Announcement announcement, Integer step, Boolean status, LocalDateTime createdAt){
