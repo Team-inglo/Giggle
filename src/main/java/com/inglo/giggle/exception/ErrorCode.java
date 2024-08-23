@@ -16,7 +16,9 @@ public enum ErrorCode {
     NOT_FOUND_LOGIN_USER(40401, HttpStatus.NOT_FOUND, "로그인한 사용자가 존재하지 않습니다."),
     NOT_FOUND_AUTHORIZATION_HEADER(40401, HttpStatus.NOT_FOUND, "Authorization 헤더가 존재하지 않습니다."),
     NOT_FOUND_USER(40401, HttpStatus.NOT_FOUND, "해당 사용자가 존재하지 않습니다."),
-    NOT_FOUND_USER_FILE(40402, HttpStatus.NOT_FOUND, "해당 사용자 파일이 존재하지 않습니다."),
+    NOT_FOUND_APPLICANT(40401, HttpStatus.NOT_FOUND, "해당 APPLICANT가 존재하지 않습니다."),
+    NOT_FOUND_OWNER(40401, HttpStatus.NOT_FOUND, "해당 OWNER가 존재하지 않습니다."),
+    NOT_FOUND_APPLICANT_FILE(40401, HttpStatus.NOT_FOUND, "해당 사용자 파일이 존재하지 않습니다."),
 
     // Invalid Argument Error
     MISSING_REQUEST_PARAMETER(40000, HttpStatus.BAD_REQUEST, "필수 요청 파라미터가 누락되었습니다."),
