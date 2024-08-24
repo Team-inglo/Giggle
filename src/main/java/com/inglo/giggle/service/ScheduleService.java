@@ -53,7 +53,7 @@ public class ScheduleService {
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
-    public Map<String, Object> getSchedule(Long userId, Integer year, Integer month) {
+    public Map<String, Object> getScheduleForCalendar(Long userId, Integer year, Integer month) {
         AtomicReference<Double> totalSalary = new AtomicReference<>(0.0);
         Map<String,Object> result = new HashMap<>();
         YearMonth yearMonth = YearMonth.of(year, month);
@@ -99,6 +99,23 @@ public class ScheduleService {
 
         return result;
     }
+
+    public List<ScheduleDto> getScheduleOfPartTime(Long partTimeId, Integer year, Integer month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        return scheduleRepository.findAllByPartTimeIdAndYearAndMonth(partTimeId, startOfMonth, endOfMonth).stream()
+                .map(schedule -> ScheduleDto.builder()
+                        .id(schedule.getId())
+                        .partTimeName(schedule.getPartTime().getPartTimeName())
+                        .hourlyRate(schedule.getPartTime().getHourlyRate())
+                        .startAt(schedule.getStartAt())
+                        .endAt(schedule.getEndAt())
+                        .build()
+                ).toList();
+    }
+
     @Transactional
     public void updateSchedule(Long scheduleId, ScheduleCreateDto scheduleCreateDto) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));

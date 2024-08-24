@@ -11,7 +11,6 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @Query("SELECT s FROM Schedule s " +
-            "JOIN FETCH s.partTime " +
             "WHERE s.user.id = :userId " +
             "AND (" +
             "   (s.startAt >= :startOfMonth AND s.startAt <= :endOfMonth) OR " +
@@ -21,4 +20,15 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findAllByUserIdAndYearAndMonth(Long userId,
                                                   LocalDateTime startOfMonth,
                                                   LocalDateTime endOfMonth);
+
+    @Query("SELECT s FROM Schedule s " +
+            "WHERE s.partTime.id = :partTimeId " +
+            "AND (" +
+            "   (s.startAt >= :startOfMonth AND s.startAt <= :endOfMonth) OR " +
+            "   (s.endAt >= :startOfMonth AND s.endAt <= :endOfMonth) OR " +
+            "   (s.startAt <= :startOfMonth AND s.endAt >= :endOfMonth)" +
+            ")")
+    List<Schedule> findAllByPartTimeIdAndYearAndMonth(Long partTimeId,
+                                                      LocalDateTime startOfMonth,
+                                                      LocalDateTime endOfMonth);
 }
