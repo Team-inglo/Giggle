@@ -34,6 +34,15 @@ public class ImageUtil {
     @Value("${cloud.aws.s3.url}")
     private String bucketUrl;
 
+    public String encodeImageToBase64(MultipartFile file) {
+        try {
+            byte[] imageBytes = file.getBytes();
+            return Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public String decodeAndUploadBase64(String base64Image) {
         byte[] imageBytes = Base64.getDecoder().decode(base64Image);
 
@@ -51,7 +60,7 @@ public class ImageUtil {
         return uuid + ".png";
     }
 
-    public String uploadProfileImageFile(MultipartFile file, Long userId) {
+    public String uploadPassportImageFile(MultipartFile file, Long userId) {
         final String contentType = file.getContentType();
         assert contentType != null;
         String type = "." + contentType.substring(contentType.indexOf("/") + 1);
@@ -61,7 +70,7 @@ public class ImageUtil {
         }
 
         String uuid = UUID.randomUUID().toString();
-        String fileName = "user_" + userId + "/" + uuid + type;
+        String fileName = "user_" + userId + "/passport/" + uuid + type;
 
         try {
             amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), null);
@@ -72,7 +81,7 @@ public class ImageUtil {
         return bucketUrl + fileName;
     }
 
-    public String uploadMissionImageFile(MultipartFile file, Long userId, Long teamId) {
+    public String uploadRegistrationImageFile(MultipartFile file, Long userId) {
         final String contentType = file.getContentType();
         assert contentType != null;
         String type = "." + contentType.substring(contentType.indexOf("/") + 1);
@@ -82,7 +91,7 @@ public class ImageUtil {
         }
 
         String uuid = UUID.randomUUID().toString();
-        String fileName = "user_" + userId + "team_" + teamId + "/" + uuid + type;
+        String fileName = "user_" + userId + "/registration/" + uuid + type;
 
         try {
             amazonS3Client.putObject(bucketName, fileName, file.getInputStream(), null);
@@ -91,5 +100,8 @@ public class ImageUtil {
         }
 
         return bucketUrl + fileName;
+    }
+    public void deleteImageFile(String fileName) {
+        amazonS3Client.deleteObject(bucketName, fileName);
     }
 }

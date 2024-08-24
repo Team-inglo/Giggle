@@ -13,8 +13,8 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "서명요청", description = "서명요청 API")
-@RequestMapping("/api/v1/documents")
+@Tag(name = "지원 서류", description = "사용자의 아르바이트 지원 서류 관련 API")
+@RequestMapping("/api/v1/users/documents")
 public class DocumentController {
     private final DocumentService documentService;
 
