@@ -15,6 +15,7 @@ import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.ApplyRepository;
 import com.inglo.giggle.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ public class ApplyService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // document log 조회 api
+    @Transactional
     public UserApplyLogDto getUserApplyLogs(Long userId, Boolean status) {
 
         // User로 Apply 엔티티 리스트 가져오기
@@ -49,10 +52,10 @@ public class ApplyService {
                 .filter(apply -> apply.getStatus().equals(status))
                 .toList();
 
-        List<UserApplyLogDto.DocumentSpec> documentSpecs = applies.stream()
+        List<UserApplyLogDto.DocumentSpec> documentSpecs = filteredApply.stream()
                 .map(apply -> new UserApplyLogDto.DocumentSpec(
                         apply.getAnnouncement().getTitle(),
-                        apply.getCreatedAt().toLocalDate(),
+                        apply.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                         apply.getStep(),
                         ""
                 ))
