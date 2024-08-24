@@ -13,12 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -28,31 +26,63 @@ public class ScheduleService {
     private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
     private final PartTimeRepository partTimeRepository;
+
     @Transactional
-    public void createSchedule(Long userId, List<ScheduleCreateDto> scheduleCreateDtos) {
+    public void createSchedule(Long userId, Long partTimeId, List<ScheduleCreateDto> requestSchedules) {
         try {
-            scheduleCreateDtos.forEach(scheduleCreateDto -> {
-                if(scheduleCreateDto.startAt().isAfter(scheduleCreateDto.endAt()) || scheduleCreateDto.startAt().isEqual(scheduleCreateDto.endAt())) {
+            // 전달받은 스케쥴에서 날짜 리스트 추출
+            List<LocalDate> requestDates = requestSchedules.stream()
+                    .map(schedule -> schedule.startAt().toLocalDate())
+                    .distinct()
+                    .toList();
+
+            // DB에서 유저의 모든 스케줄의 날짜 가져오기
+            List<Schedule> existingSchedules = scheduleRepository.findAllByPartTimeId(partTimeId);
+
+            for (ScheduleCreateDto requestSchedule : requestSchedules) {  // 스케줄 생성 및 수정 처리
+                // 스케쥴에 대한 유효성 검사
+                if(requestSchedule.startAt().isAfter(requestSchedule.endAt()) || requestSchedule.startAt().isEqual(requestSchedule.endAt())) {
                     throw new CommonException(ErrorCode.START_AT_AFTER_END_AT);
                 }
-                        scheduleRepository.save(
-                                Schedule.builder()
-                                        .partTime(partTimeRepository.findById(scheduleCreateDto.partTimeId()).orElseThrow(
-                                                () -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE)
-                                        ))
-                                        .user(userRepository.findById(userId).orElseThrow(
-                                                () -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE)
-                                        ))
-                                        .startAt(scheduleCreateDto.startAt())
-                                        .endAt((scheduleCreateDto.endAt()))
-                                        .build()
-                        );
-                    }
-            );
+                LocalDate requestDate = requestSchedule.startAt().toLocalDate();
+
+                // DB에 해당 날짜가 존재하는지 확인
+                Optional<Schedule> matchingSchedule = existingSchedules.stream()
+                        .filter(schedule -> schedule.getStartAt().toLocalDate().equals(requestDate))
+                        .findFirst();
+
+                if (matchingSchedule.isPresent()) {
+                    // 겹치는 스케줄이 있으면 수정
+                    Schedule scheduleToUpdate = matchingSchedule.get();
+                    scheduleToUpdate.updateSchedule(requestSchedule.startAt(), requestSchedule.endAt());
+                } else {
+                    // 겹치는 스케줄이 없으면 새로 생성
+                    Schedule newSchedule = Schedule.builder()
+                            .partTime(partTimeRepository.findById(partTimeId)
+                                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE)))
+                            .user(userRepository.findById(userId)
+                                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE)))
+                            .startAt(requestSchedule.startAt())
+                            .endAt(requestSchedule.endAt())
+                            .build();
+                    scheduleRepository.save(newSchedule);
+                }
+            }
+            // DB에만 존재하고, 요청된 스케줄에는 없는 날짜에 해당하는 스케줄 삭제
+            for (Schedule existingSchedule : existingSchedules) {
+                LocalDate existingDate = existingSchedule.getStartAt().toLocalDate();
+                if (!requestDates.contains(existingDate)) {
+                    scheduleRepository.deleteByUserIdAndStartAt(userId, existingSchedule.getStartAt());
+                }
+            }
+
         } catch (Exception e) {
+            log.error("Failed to create schedule", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+
     public Map<String, Object> getScheduleForCalendar(Long userId, Integer year, Integer month) {
         AtomicReference<Double> totalSalary = new AtomicReference<>(0.0);
         Map<String,Object> result = new HashMap<>();
@@ -114,39 +144,5 @@ public class ScheduleService {
                         .endAt(schedule.getEndAt())
                         .build()
                 ).toList();
-    }
-
-    @Transactional
-    public void updateSchedule(Long scheduleId, ScheduleCreateDto scheduleCreateDto) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
-        if ((scheduleCreateDto.startAt()!=null && scheduleCreateDto.endAt()!=null) && (scheduleCreateDto.startAt().isAfter(scheduleCreateDto.endAt()) || scheduleCreateDto.startAt().isEqual(scheduleCreateDto.endAt()))) {
-            throw new CommonException(ErrorCode.START_AT_AFTER_END_AT);
-        }
-        else if ((scheduleCreateDto.startAt() == null && scheduleCreateDto.endAt()!=null) && (scheduleCreateDto.endAt().isBefore(schedule.getStartAt()) || scheduleCreateDto.endAt().isEqual(schedule.getStartAt()))) {
-            throw new CommonException(ErrorCode.START_AT_AFTER_END_AT);
-        }
-        else if ((scheduleCreateDto.startAt() != null && scheduleCreateDto.endAt() == null) && (scheduleCreateDto.startAt().isAfter(schedule.getEndAt()) || scheduleCreateDto.startAt().isEqual(schedule.getEndAt()))) {
-            throw new CommonException(ErrorCode.START_AT_AFTER_END_AT);
-        }
-        else {
-            try {
-                schedule.updateSchedule(
-                        scheduleCreateDto.startAt(),
-                        scheduleCreateDto.endAt()
-                );
-            } catch (Exception e) {
-                throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
-            }
-        }
-    }
-
-    @Transactional
-    public void deleteSchedule(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_RESOURCE));
-        try {
-            scheduleRepository.delete(schedule);
-        } catch (Exception e) {
-            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
     }
 }
