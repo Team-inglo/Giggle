@@ -1,14 +1,10 @@
 package com.inglo.giggle.service;
 
-import com.inglo.giggle.domain.Announcement;
 import com.inglo.giggle.domain.Apply;
-import com.inglo.giggle.domain.Document;
 import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.response.UserApplyDetailDto;
 import com.inglo.giggle.dto.response.UserApplyLogDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
-import com.inglo.giggle.dto.response.WebClientResponseDto;
-import com.inglo.giggle.dto.type.DocumentType;
 import com.inglo.giggle.dto.type.PartTimeStep;
 import com.inglo.giggle.dto.type.RequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
@@ -26,7 +22,6 @@ import reactor.core.publisher.Mono;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
