@@ -17,14 +17,14 @@ public class Document {
     @Column(name = "document_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "apply_id", nullable = false)
     private Apply apply;
 
     @Column(name = "type", nullable = false)
     private DocumentType type;
 
-    @Column(name = "document_id", nullable = false)
+    @Column(name = "document_type_id", nullable = false)
     private String documentId;
 
     @Builder

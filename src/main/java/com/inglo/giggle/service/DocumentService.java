@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public class DocumentService {
                         req.name(),
                         type.getMessage()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         WebClientRequestDto.Document document = new WebClientRequestDto.Document(
                 participantMappings,
@@ -77,7 +78,11 @@ public class DocumentService {
                 .retrieve()
                 .onStatus(status -> status != HttpStatus.CREATED, res -> {
                     return res.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR)));
+                            .flatMap(errorBody -> {
+                                String errorMessage = String.format("Modusign API error: %s", errorBody);
+                                System.out.println(errorMessage);
+                                return Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR));
+                            });
                 })
                 .bodyToMono(WebClientResponseDto.class)
                 .block();
@@ -90,7 +95,7 @@ public class DocumentService {
     }
 
     private String getembeddedUrl(String documentId, String participantId) {
-        String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, ""); // redirect url 추가
+        String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, "https://github.com/bianbbc87"); // redirect url 추가
 
         WebClientEmbeddedResponseDto responseDto = webClient.get()
                 .uri(url)
@@ -99,7 +104,11 @@ public class DocumentService {
                 .retrieve()
                 .onStatus(status -> status != HttpStatus.OK, res -> {
                     return res.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR)));
+                            .flatMap(errorBody -> {
+                                String errorMessage = String.format("Modusign API error: %s", errorBody);
+                                System.out.println(errorMessage);
+                                return Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR));
+                            });
                 })
                 .bodyToMono(WebClientEmbeddedResponseDto.class)
                 .block();
@@ -116,6 +125,7 @@ public class DocumentService {
                 .announcement(announcement)
                 .step(1)
                 .status(true)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         try {
