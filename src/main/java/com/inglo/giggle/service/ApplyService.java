@@ -72,8 +72,8 @@ public class ApplyService {
         Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLY));
 
         // Document dto로 변환
-        List<UserApplyDetailDto.Document> completedDocuments = apply.getDocuments().stream()
-                .map(doc -> new UserApplyDetailDto.Document(
+        List<UserApplyDetailDto.CompletedDocument> completedDocuments = apply.getDocuments().stream()
+                .map(doc -> new UserApplyDetailDto.CompletedDocument(
                         doc.getId(),
                         doc.getType().getTitle(),
                         getViewEmbeddedUrl(doc.getDocumentId())

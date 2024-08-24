@@ -13,13 +13,13 @@ public record UserApplyDetailDto (
         @JsonProperty("name") String name,
         @JsonProperty("startDate") String startDate,
         @JsonProperty("step") Integer step,
-        @JsonProperty("completedDocuments") List<Document> completedDocuments,
+        @JsonProperty("completedDocuments") List<CompletedDocument> completedDocuments,
         @JsonProperty("remainingSteps") List<RemainingStep> remainingSteps,
         @JsonProperty("stepComment") String stepComment,
         @JsonProperty("announcementId") Long announcementId
         ) {
 
-        public record Document (
+        public record CompletedDocument (
                 @JsonProperty("id") Long id,
                 @JsonProperty("name") String name,
                 @JsonProperty("url") String url
