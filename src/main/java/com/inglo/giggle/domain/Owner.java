@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @Table(name = "owner")
 public class Owner {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "owner_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @MapsId
+    @JoinColumn(name = "owner_id", nullable = false)
     private User user;
 
     @Column(name = "owner_registration_number", nullable = false)
