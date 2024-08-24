@@ -37,7 +37,7 @@ public class Apply {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "apply", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "apply", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Document> documents = new ArrayList<>();
 
     @Builder

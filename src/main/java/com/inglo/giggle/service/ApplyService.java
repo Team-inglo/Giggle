@@ -67,30 +67,41 @@ public class ApplyService {
     }
 
     // 신청 서류 디테일 get
-    public void getUserApplyDetails(Long userId, Long applyId) {
+    @Transactional
+    public UserApplyDetailDto getUserApplyDetails(Long userId, Long applyId) {
         Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLY));
-        // index 몇이 무슨 서류인지 확인 필요
-        String documentId = apply.getDocuments().get(0).getDocumentId(); // get docuemnt Id
-        String embeddedUrl = getViewEmbeddedUrl(documentId);
+
+        // Document 리스트를 가져오고, documentId가 있는 경우에만 Document 객체로 변환
+        List<UserApplyDetailDto.Document> completedDocuments = apply.getDocuments().stream()
+                .filter(doc -> doc.getDocumentId() != null)
+                .map(doc -> new UserApplyDetailDto.Document(
+                        doc.getId(),
+                        doc.getType().getTitle(),
+                        getViewEmbeddedUrl(doc.getDocumentId())
+                ))
+                .toList();
 
         List<UserApplyDetailDto.RemainingStep> remainingSteps = Arrays.stream(PartTimeStep.values())
                 .filter(step -> step.getId() > apply.getStep())
                 .map(step -> new UserApplyDetailDto.RemainingStep(step.getId().longValue(), step.getComment()))
                 .toList();
 
-        UserApplyDetailDto.builder()
+        UserApplyDetailDto userApplyDetailDto = UserApplyDetailDto.builder()
                 .name(apply.getAnnouncement().getTitle())
-                .startDate(apply.getCreatedAt().toLocalDate())
+                .startDate(apply.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .step(apply.getStep())
-                .documentUrl(embeddedUrl)
+                .completedDocuments(completedDocuments)
                 .remainingSteps(remainingSteps)
                 .stepComment(RequestStepCommentType.getCommentById(apply.getStep()))
+                .announcementId(apply.getAnnouncement().getId())
                 .build();
+
+        return userApplyDetailDto;
 
     }
 
     private String getViewEmbeddedUrl(String documentId) {
-        String url = String.format("/documents/%s/embedded-view?redirectUrl=%s", documentId, ""); // redirect url 추가
+        String url = String.format("/documents/%s/embedded-view?redirectUrl=%s", documentId, "https://github.com/bianbbc87"); // redirect url 추가
 
         WebClientEmbeddedResponseDto responseDto = webClient.get()
                 .uri(url)
@@ -99,7 +110,11 @@ public class ApplyService {
                 .retrieve()
                 .onStatus(status -> status != HttpStatus.OK, res -> {
                     return res.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR)));
+                            .flatMap(errorBody -> {
+                                String errorMessage = String.format("Modusign API error: %s", errorBody);
+                                System.out.println(errorMessage);
+                                return Mono.error(new CommonException(ErrorCode.INVALID_MODUSIGN_ERROR));
+                            });
                 })
                 .bodyToMono(WebClientEmbeddedResponseDto.class)
                 .block();
