@@ -47,6 +47,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(registry ->
                         registry
                                 .requestMatchers(Constants.NO_NEED_AUTH_URLS.toArray(String[]::new)).permitAll()
+                                .requestMatchers(Constants.OWNERS_URLS.toArray(String[]::new)).hasRole("OWNER")
+                                .requestMatchers(Constants.APPLICANTS_URLS.toArray(String[]::new)).hasRole("APPLICANT")
+                                .requestMatchers(Constants.USERS_URLS.toArray(String[]::new)).hasAnyRole("APPLICANT", "OWNER")
                                 .anyRequest().authenticated()
                 )
 

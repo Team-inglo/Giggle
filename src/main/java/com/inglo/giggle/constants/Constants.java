@@ -22,6 +22,10 @@ public class Constants {
             "/v3/api-docs/**",
             "/swagger-ui/**");
 
-    public static List<String> USER_URLS = List.of(
+    public static List<String> APPLICANTS_URLS = List.of(
+            "/api/v1/applicants/**");
+    public static List<String> OWNERS_URLS = List.of(
+            "/api/v1/owners/**");
+    public static List<String> USERS_URLS = List.of(
             "/api/v1/users/**");
 }

@@ -42,4 +42,13 @@ public class PartTime {
         this.color = color;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updatePartTime(String partTimeName, Integer hourlyRate, String color){
+        if(partTimeName != null)
+            this.partTimeName = partTimeName;
+        if(hourlyRate != null)
+            this.hourlyRate = hourlyRate;
+        if(color != null)
+            this.color = color;
+    }
 }
