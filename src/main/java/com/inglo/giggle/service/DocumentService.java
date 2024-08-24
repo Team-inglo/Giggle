@@ -123,7 +123,7 @@ public class DocumentService {
         Apply apply = Apply.builder()
                 .user(user)
                 .announcement(announcement)
-                .step(1)
+                .step(0)
                 .status(true)
                 .createdAt(LocalDateTime.now())
                 .build();
