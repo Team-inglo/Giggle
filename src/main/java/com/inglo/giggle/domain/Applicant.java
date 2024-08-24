@@ -96,12 +96,15 @@ public class Applicant {
                 .endDay(LocalDateTime.now())
                 .build();
     }
-
     public void updateApplicant(UpdateApplicantDto updateApplicantDto) {
-        this.address = updateApplicantDto.address();
-        this.gpa = updateApplicantDto.gpa();
-        this.startDay = updateApplicantDto.startDay();
-        this.endDay = updateApplicantDto.endDay();
+        if (updateApplicantDto.address() != null && (!this.address.equals(updateApplicantDto.address())))
+            this.address = updateApplicantDto.address();
+        if (updateApplicantDto.gpa() != null && (!this.gpa.equals(updateApplicantDto.gpa())))
+            this.gpa = updateApplicantDto.gpa();
+        if (updateApplicantDto.startDay() != null && (!this.startDay.equals(updateApplicantDto.startDay())))
+            this.startDay = updateApplicantDto.startDay();
+        if (updateApplicantDto.endDay() != null && (!this.endDay.equals(updateApplicantDto.endDay())))
+            this.endDay = updateApplicantDto.endDay();
     }
 
     public void registerPassport(String passportNumber, String name, String sex, String dateOfBirth, String nationality, String passportIssueDate, String passportExpiryDate) {

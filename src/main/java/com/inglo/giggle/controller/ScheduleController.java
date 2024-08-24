@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "아르바이트 스케쥴", description = "사용자의 아르바이트 기록 속, 스케쥴 하나하나 관련된 API")
@@ -18,9 +20,9 @@ public class ScheduleController {
     @PostMapping("")
     public ResponseDto<?> createSchedule(
             @UserId Long userId,
-            @RequestBody ScheduleCreateDto scheduleCreateDto
+            @RequestBody List<ScheduleCreateDto> scheduleCreateDtos
     ) {
-        scheduleService.createSchedule(userId, scheduleCreateDto);
+        scheduleService.createSchedule(userId, scheduleCreateDtos);
         return ResponseDto.created(null);
     }
     @GetMapping("")
