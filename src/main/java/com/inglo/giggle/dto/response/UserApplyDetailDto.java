@@ -16,7 +16,6 @@ public record UserApplyDetailDto (
         @JsonProperty("completedDocuments") List<Document> completedDocuments,
         @JsonProperty("remainingSteps") List<RemainingStep> remainingSteps,
         @JsonProperty("stepComment") String stepComment,
-        @JsonProperty("viewAnnouncementUrl") String viewAnnouncementUrl,
         @JsonProperty("announcementId") Long announcementId
         ) {
 

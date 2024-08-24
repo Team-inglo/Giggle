@@ -17,7 +17,7 @@ public class Document {
     @Column(name = "document_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "apply_id", nullable = false)
     private Apply apply;
 

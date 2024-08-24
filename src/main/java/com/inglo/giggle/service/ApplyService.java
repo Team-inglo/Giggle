@@ -57,7 +57,7 @@ public class ApplyService {
                         apply.getAnnouncement().getTitle(),
                         apply.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                         apply.getStep(),
-                        ""
+                        RequestStepCommentType.getCommentById(apply.getStep()) // apply step과 일치하는 stepComment 출력
                 ))
                 .toList();
 
@@ -71,9 +71,8 @@ public class ApplyService {
     public UserApplyDetailDto getUserApplyDetails(Long userId, Long applyId) {
         Apply apply = applyRepository.findById(applyId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLY));
 
-        // Document 리스트를 가져오고, documentId가 있는 경우에만 Document 객체로 변환
+        // Document dto로 변환
         List<UserApplyDetailDto.Document> completedDocuments = apply.getDocuments().stream()
-                .filter(doc -> doc.getDocumentId() != null)
                 .map(doc -> new UserApplyDetailDto.Document(
                         doc.getId(),
                         doc.getType().getTitle(),
