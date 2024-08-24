@@ -36,9 +36,7 @@ public class ApplicantService {
 
     @Transactional
     public void updateApplicant(@UserId Long userId, UpdateApplicantDto updateApplicantDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
 
         applicant.updateApplicant(updateApplicantDto);
@@ -46,9 +44,7 @@ public class ApplicantService {
 
     @Transactional
     public void updatePassport(@UserId Long userId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         ApplicantFile applicantFile = applicantFileRepository.findByApplicant(applicant)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT_FILE));
@@ -130,9 +126,7 @@ public class ApplicantService {
 
     @Transactional
     public void updateRegistration(@UserId Long userId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         ApplicantFile applicantFile = applicantFileRepository.findByApplicant(applicant)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT_FILE));
@@ -202,9 +196,7 @@ public class ApplicantService {
 
     @Transactional
     public void updateTopik(Long userId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
             String base64Image = imageUtil.encodeImageToBase64(file);
@@ -238,9 +230,7 @@ public class ApplicantService {
 
     @Transactional
     public void updateSocialIntegrationProgram(Long userId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
             String base64Image = imageUtil.encodeImageToBase64(file);
@@ -273,9 +263,7 @@ public class ApplicantService {
 
     @Transactional
     public void updateSejongInstitute(Long userId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user)
+        Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
             String base64Image = imageUtil.encodeImageToBase64(file);
