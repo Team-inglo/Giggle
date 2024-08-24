@@ -1,5 +1,6 @@
 package com.inglo.giggle.domain;
 
+import com.inglo.giggle.dto.type.DocumentType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,15 +22,16 @@ public class Document {
     private Apply apply;
 
     @Column(name = "type", nullable = false)
-    private Integer type;
+    private DocumentType type;
 
-    @Column(name = "template_id", nullable = false)
-    private Long templateId;
+    @Column(name = "document_type_id", nullable = false)
+    private String documentId;
 
     @Builder
-    public Document(Apply apply, Integer type, Long templateId){
+    public Document(Apply apply, DocumentType type, String documentId){
         this.apply = apply;
         this.type = type;
-        this.templateId = templateId;
+        this.documentId = documentId;
     }
+
 }

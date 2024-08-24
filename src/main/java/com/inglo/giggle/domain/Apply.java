@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +37,9 @@ public class Apply {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "apply", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Document> documents = new ArrayList<>();
+
     @Builder
     public Apply(User user, Announcement announcement, Integer step, Boolean status, LocalDateTime createdAt){
         this.user = user;
@@ -44,5 +49,16 @@ public class Apply {
         this.createdAt = createdAt;
     }
 
+    public void addStep(){
+        this.step++;
+    }
+
+    public void advanceStep(Integer newStep){
+        this.step = newStep;
+    }
+
+    public void advanceStatus() {
+        this.status = false;
+    }
 
 }

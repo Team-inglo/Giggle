@@ -60,11 +60,14 @@ dependencies {
     // lang3
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
+
     // AWS
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'org.springframework.cloud:spring-cloud-aws-context:2.2.6.RELEASE'
     implementation 'org.springframework.cloud:spring-cloud-aws-autoconfigure:2.2.6.RELEASE'
 
+    // webClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // OpenNLP
     implementation group: 'org.apache.opennlp', name: 'opennlp-tools', version: '2.4.0'
 }
