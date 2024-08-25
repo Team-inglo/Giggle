@@ -12,4 +12,13 @@ public enum EGender {
 
     private final String sex;
     private final String description;
+
+    public static String getDescriptionBySex(String sex) {
+        for (EGender gender : EGender.values()) {
+            if (gender.getSex().equalsIgnoreCase(sex)) {
+                return gender.getDescription();
+            }
+        }
+        return ""; // 암것도 없을 때
+    }
 }

@@ -42,6 +42,7 @@ public class AnnouncementController {
             @UserId Long userId,
             @PathVariable Long announcementId
     ) {
-        return null;
+        AnnouncementDetailDto announcementDetailDto = announcementService.getAnnouncementDetails(userId, announcementId);
+        return announcementDetailDto;
     }
 }

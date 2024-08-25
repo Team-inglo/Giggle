@@ -46,7 +46,7 @@ public class OwnerService {
         Announcement announcement = Announcement.builder()
                 .owner(owner)
                 .title(request.title())
-                .jobType(EJobType.fromType(request.jobType()))
+                .jobType(request.jobType())
                 .hourlyRate(request.hourlyWage())
                 .workStartDate(request.workStartDate())
                 .deadLine(request.deadline())
@@ -74,6 +74,7 @@ public class OwnerService {
     }
 
     // 아르바이트 공고 상태 리스트 조회
+    @Transactional
     public OwnerAnnouncementStatusListDto getOwnerAnnouncementStatusList(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
@@ -127,6 +128,7 @@ public class OwnerService {
     }
 
     // 아르바이트 공소 상태 상세 조회
+    @Transactional
     public OwnerAnnouncementStatusDetailDto getOwnerAnnouncementStatusDetails(Long userId, Long announcementId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
@@ -144,7 +146,7 @@ public class OwnerService {
         // 서류 지원자들 list 정렬
         List<OwnerAnnouncementStatusDetailDto.applicantsStatus> applicantsStatuses = applies.stream()
                 .map(apply -> {
-                    String embeddedUrl = null;
+                    String embeddedUrl = "";
                     if(apply.getDocuments().get(2).getDocumentId() != null) {
                         embeddedUrl = getViewEmbeddedUrl(apply.getDocuments().get(2).getDocumentId());
                     }

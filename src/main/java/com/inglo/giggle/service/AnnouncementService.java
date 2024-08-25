@@ -10,12 +10,15 @@ import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.dto.type.EAnnouncementPeriod;
 import com.inglo.giggle.dto.type.EDocumentType;
+import com.inglo.giggle.dto.type.EEducation;
+import com.inglo.giggle.dto.type.EGender;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.AnnouncementRepository;
 import com.inglo.giggle.repository.ApplicantRepository;
 import com.inglo.giggle.repository.OwnerRepository;
 import com.inglo.giggle.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -39,22 +42,23 @@ public class AnnouncementService {
     private final OwnerRepository ownerRepository;
 
     // 아르바이트 공고 생성
+    @Transactional
     public AnnouncementListDto getAnnouncementListForCategory(Long userId, String sortBy, Boolean isOwner, String jobType, String sortOrder, List<String> region, EAnnouncementPeriod period) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
-        Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
         List<Announcement> announcements;
 
         // 정렬 객체 생성
         Sort sort = "DESC".equalsIgnoreCase(sortOrder) ? Sort.by("createdAt").descending() : Sort.by("createdAt").ascending();
 
         if(isOwner != null && isOwner) { // 고용주라면
+            Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
             announcements = announcementRepository.findByOwner(owner, sort); // 고용주거 중에서 정렬
         } else { // 고용주가 아니라면
             announcements = announcementRepository.findAll(sort); // 그냥 정렬
         }
 
         if(sortBy != null && sortBy.equals("RECOMMENDATION")) { // 추천 알고리즘이라면
+            Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
             announcements = filterdSortByRecommendation(applicant, sortBy, announcements); // 추천 알고리즘 추가 필요
         } else {
             // 변화 없음.
@@ -146,6 +150,7 @@ public class AnnouncementService {
         return announcements;
     }
 
+    @Transactional
     public AnnouncementDetailDto getAnnouncementDetails(Long userId, Long announcementId) {
         userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
@@ -178,8 +183,8 @@ public class AnnouncementService {
                 .workDays(workDaysString)  // 요일 정보
                 .workTimes(workTimesString)  // 시간 정보
                 .age(announcement.getAge())
-                .gender(announcement.getGender())
-                .education(announcement.getEducation())
+                .gender(EGender.getDescriptionBySex(announcement.getGender()))
+                .education(EEducation.getDescriptionByType(announcement.getEducation()))
                 .addressName(announcement.getOwner().getStoreAddressName())
                 .numberRecruited(announcement.getNumberRecruited())
                 .content(announcement.getContent())

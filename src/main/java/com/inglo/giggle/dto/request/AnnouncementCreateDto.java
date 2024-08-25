@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.inglo.giggle.dto.type.EEducation;
 import com.inglo.giggle.dto.type.EGender;
+import com.inglo.giggle.dto.type.EJobType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public record AnnouncementCreateDto(
         String title,
 
         @JsonProperty("job_type") @Schema(description = "업직종", required = true)
-        String jobType,
+        EJobType jobType,
 
         @JsonProperty("dead_line") @Schema(description = "마감일자", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDate deadline,

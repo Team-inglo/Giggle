@@ -13,4 +13,13 @@ public enum EEducation {
 
     private final String type;
     private final String description;
+
+    public static String getDescriptionByType(String type) {
+        for (EEducation education : EEducation.values()) {
+            if (education.getType().equalsIgnoreCase(type)) {
+                return education.getDescription();
+            }
+        }
+        return ""; // 암것도 없는 경우
+    }
 }

@@ -33,16 +33,18 @@ public class OwnerController {
     public OwnerAnnouncementStatusListDto getOwnersAnnouncementStatus(
             @UserId Long userId
     ) {
-        return null;
+        OwnerAnnouncementStatusListDto ownerAnnouncementStatusListDto = ownerService.getOwnerAnnouncementStatusList(userId);
+        return ownerAnnouncementStatusListDto;
     }
 
     @GetMapping("/announcements/{announcementId}")
     @Operation(summary = "기업의 공고 관리 상세 조회", description = "기업이 등록한 공고의 상세 조회")
     public OwnerAnnouncementStatusDetailDto getOwnersAnnouncementStatusDetails(
             @UserId Long userId,
-            @RequestBody Long announcementId
+            @PathVariable Long announcementId
     ) {
-        return null;
+        OwnerAnnouncementStatusDetailDto ownerAnnouncementStatusDetailDto = ownerService.getOwnerAnnouncementStatusDetails(userId, announcementId);
+        return ownerAnnouncementStatusDetailDto;
     }
 
     @PatchMapping("")
