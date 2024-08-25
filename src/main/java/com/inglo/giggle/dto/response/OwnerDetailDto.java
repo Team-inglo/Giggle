@@ -12,7 +12,9 @@ public record OwnerDetailDto(
         String ownerRegistrationNumber,
         String ownerName,
         String storeName,
-        String storeAddress
+        String storeAddressName,
+        Float storeAddressX,
+        Float storeAddressY
 ) implements UserDetailDto {
     public static OwnerDetailDto fromEntity(User user, Owner owner) {
         return OwnerDetailDto.builder()
@@ -20,7 +22,9 @@ public record OwnerDetailDto(
                 .ownerRegistrationNumber(owner.getOwnerRegistrationNumber())
                 .ownerName(owner.getOwnerName())
                 .storeName(owner.getStoreName())
-                .storeAddress(owner.getStoreAddress())
+                .storeAddressName(owner.getStoreAddressName())
+                .storeAddressX(owner.getStoreAddressX())
+                .storeAddressY(owner.getStoreAddressY())
                 .build();
     }
 }

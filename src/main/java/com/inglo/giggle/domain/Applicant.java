@@ -24,8 +24,14 @@ public class Applicant {
     @JoinColumn(name = "applicant_id")
     private User user;
 
-    @Column(name = "address")
-    private String address="";
+    @Column(name = "address_name")
+    private String addressName;
+
+    @Column(name = "address_x")
+    private Float addressX;
+
+    @Column(name = "address_y")
+    private Float addressY;
 
     @Column(name = "gpa")
     private String gpa="0";
@@ -79,26 +85,22 @@ public class Applicant {
     private String sejongInstituteScore = "0";
 
     @Builder
-    public Applicant(User user, String address, String gpa, LocalDateTime startDay, LocalDateTime endDay) {
+    public Applicant(User user) {
         this.user = user;
-        this.address = address;
-        this.gpa = gpa;
-        this.startDay = startDay;
-        this.endDay = endDay;
     }
 
     public static Applicant signUp(User user) {
         return Applicant.builder()
                 .user(user)
-                .address("")
-                .gpa("0")
-                .startDay(LocalDateTime.now())
-                .endDay(LocalDateTime.now())
                 .build();
     }
     public void updateApplicant(UpdateApplicantDto updateApplicantDto) {
-        if (updateApplicantDto.address() != null && (!this.address.equals(updateApplicantDto.address())))
-            this.address = updateApplicantDto.address();
+        if (updateApplicantDto.addressName() != null && (!this.addressName.equals(updateApplicantDto.addressName())))
+            this.addressName = updateApplicantDto.addressName();
+        if (updateApplicantDto.addressX() != null && (!this.addressX.equals(updateApplicantDto.addressX())))
+            this.addressX = updateApplicantDto.addressX();
+        if (updateApplicantDto.addressY() != null && (!this.addressY.equals(updateApplicantDto.addressY())))
+            this.addressY = updateApplicantDto.addressY();
         if (updateApplicantDto.gpa() != null && (!this.gpa.equals(updateApplicantDto.gpa())))
             this.gpa = updateApplicantDto.gpa();
         if (updateApplicantDto.startDay() != null && (!this.startDay.equals(updateApplicantDto.startDay())))

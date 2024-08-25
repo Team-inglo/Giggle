@@ -1,5 +1,6 @@
 package com.inglo.giggle.domain;
 
+import com.inglo.giggle.dto.request.UpdateOwnerDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,44 +21,65 @@ public class Owner {
     @JoinColumn(name = "owner_id", nullable = false)
     private User user;
 
-    @Column(name = "owner_registration_number", nullable = false)
+    @Column(name = "owner_registration_number")
     private String ownerRegistrationNumber;
 
-    @Column(name = "owner_name", nullable = false)
+    @Column(name = "owner_name")
     private String ownerName;
 
-    @Column(name = "store_name", nullable = false)
+    @Column(name = "store_name")
     private String storeName;
 
-    @Column(name = "store_address", nullable = false)
-    private String storeAddress;
+    @Column(name = "store_address_name")
+    private String storeAddressName;
 
-    @Column(name = "store_phone_number", nullable = false)
+    @Column(name = "store_address_x")
+    private Float storeAddressX;
+
+    @Column(name = "store_address_y")
+    private Float storeAddressY;
+
+    @Column(name = "store_phone_number")
     private String storePhoneNumber;
 
-    @Column(name = "store_email", nullable = false)
+    @Column(name = "store_email")
     private String storeEmail;
 
     @Builder
-    public Owner(User user, String ownerRegistrationNumber, String ownerName, String storeName, String storeAddress, String storePhoneNumber, String storeEmail){
+    public Owner(User user){
         this.user = user;
-        this.ownerRegistrationNumber = ownerRegistrationNumber;
-        this.ownerName = ownerName;
-        this.storeName = storeName;
-        this.storeAddress = storeAddress;
-        this.storePhoneNumber = storePhoneNumber;
-        this.storeEmail = storeEmail;
     }
 
     public static Owner signUp(User user) {
         return Owner.builder()
                 .user(user)
-                .ownerRegistrationNumber("")
-                .ownerName("")
-                .storeName("")
-                .storeAddress("")
-                .storeEmail("")
-                .storePhoneNumber("")
                 .build();
+    }
+
+    public void updateOwner(UpdateOwnerDto updateOwnerDto) {
+        if(updateOwnerDto.ownerRegistrationNumber() != null) {
+            this.ownerRegistrationNumber = updateOwnerDto.ownerRegistrationNumber();
+        }
+        if(updateOwnerDto.ownerName() != null) {
+            this.ownerName = updateOwnerDto.ownerName();
+        }
+        if(updateOwnerDto.storeName() != null) {
+            this.storeName = updateOwnerDto.storeName();
+        }
+        if(updateOwnerDto.storeAddressName() != null) {
+            this.storeAddressName = updateOwnerDto.storeAddressName();
+        }
+        if(updateOwnerDto.storeAddressX() != null) {
+            this.storeAddressX = updateOwnerDto.storeAddressX();
+        }
+        if(updateOwnerDto.storeAddressY() != null) {
+            this.storeAddressY = updateOwnerDto.storeAddressY();
+        }
+        if(updateOwnerDto.storePhoneNumber() != null) {
+            this.storePhoneNumber = updateOwnerDto.storePhoneNumber();
+        }
+        if(updateOwnerDto.storeEmail() != null) {
+            this.storeEmail = updateOwnerDto.storeEmail();
+        }
     }
 }
