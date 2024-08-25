@@ -1,5 +1,6 @@
 package com.inglo.giggle.service;
 
+import com.inglo.giggle.domain.Applicant;
 import com.inglo.giggle.domain.Apply;
 import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.response.UserApplyDetailDto;
@@ -9,6 +10,7 @@ import com.inglo.giggle.dto.type.EPartTimeStep;
 import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
+import com.inglo.giggle.repository.ApplicantRepository;
 import com.inglo.giggle.repository.ApplyRepository;
 import com.inglo.giggle.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,7 @@ public class ApplyService {
 
     private final ApplyRepository applyRepository;
     private final UserRepository userRepository;
+    private final ApplicantRepository applicantRepository;
 
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
@@ -40,7 +43,8 @@ public class ApplyService {
 
         // User로 Apply 엔티티 리스트 가져오기
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        List<Apply> applies = applyRepository.findByUser(user);
+        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        List<Apply> applies = applyRepository.findByApplicant(applicant);
 
         // status가 동일한 것만 필터링
         List<Apply> filteredApply = applies.stream()
