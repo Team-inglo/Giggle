@@ -11,7 +11,7 @@ public record AuthSignUpDto(
         @JsonProperty("serial_id") @Schema(description = "시리얼 ID", example = "example@example.com")
         @NotNull(message = "serial_id는 null이 될 수 없습니다.")
         @Size(min = 6, max = 254, message = "시리얼 ID는 6~254자리로 입력해주세요.")
-        @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "유효하지 않은 이메일 형식입니다.")
+        @Pattern(regexp = "^[a-z0-9]{6,20}$", message = "소문자 또는 숫자로 이루어진 6자 이상 20자 미만이어야 합니다.")
         String serialId,
         @JsonProperty("password") @Schema(description = "비밀번호", example = "1234567890Aa!")
         @Pattern(
