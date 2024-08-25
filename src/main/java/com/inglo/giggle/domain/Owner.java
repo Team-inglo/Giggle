@@ -56,6 +56,8 @@ public class Owner {
                 .ownerName("")
                 .storeName("")
                 .storeAddress("")
+                .storeEmail("")
+                .storePhoneNumber("")
                 .build();
     }
 }
