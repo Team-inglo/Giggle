@@ -25,13 +25,13 @@ public class Applicant {
     private User user;
 
     @Column(name = "address_name")
-    private String addressName;
+    private String addressName = "None";
 
     @Column(name = "address_x")
-    private Float addressX;
+    private Float addressX = 0f;
 
     @Column(name = "address_y")
-    private Float addressY;
+    private Float addressY = 0f;
 
     @Column(name = "gpa")
     private String gpa="0";
@@ -44,35 +44,35 @@ public class Applicant {
 
     /* User Info - passport */
     @Column(name = "passport_number")
-    private String passportNumber="None";
+    private String passportNumber;
 
     @Column(name = "name")
-    private String name="None";
+    private String name;
 
     @Column(name = "sex")
-    private String sex="None";
+    private String sex;
 
     @Column(name = "date_of_birth")
-    private String dateOfBirth="None";
+    private String dateOfBirth;
 
     @Column(name = "nationality")
-    private String nationality="None";
+    private String nationality;
 
     @Column(name = "passport_issue_date")
-    private String passportIssueDate="None";
+    private String passportIssueDate;
 
     @Column(name = "passport_expiry_date")
-    private String passportExpiryDate="None";
+    private String passportExpiryDate;
 
     /* User Info - registration */
     @Column(name = "registration_number")
-    private String registrationNumber="None";
+    private String registrationNumber;
 
     @Column(name = "status_of_residence")
-    private String statusOfResidence="None";
+    private String statusOfResidence;
 
     @Column(name = "registration_issue_date")
-    private String registrationIssueDate="None";
+    private String registrationIssueDate;
 
     /* User Info - User Spec */
     @Column(name = "topik_score")
