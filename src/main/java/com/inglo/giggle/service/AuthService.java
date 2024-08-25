@@ -29,6 +29,7 @@ public class AuthService {
     private final ApplicantFileRepository applicantFileRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Transactional
     public boolean checkDuplicate(String serialId) { // 아이디 중복 검사. 단, 아이디가 존재하더라도 그 계정의 데이터가 비어있다면 삭제하고 중복이 아닌 것으로 간주
         User user = userRepository.findBySerialId(serialId).orElse(null);
         // 중복 안되는 경우
