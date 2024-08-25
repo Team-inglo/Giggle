@@ -21,11 +21,12 @@ public class Announcement {
     @Column(name = "announcement_id")
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Owner owner;
+
     @Column(name = "title", nullable = false)
     private String title;
-
-    @Column(name = "address", nullable = false)
-    private String address;
 
     @Column(name = "hourly_rate", nullable = false)
     private Integer hourlyRate;
@@ -48,15 +49,6 @@ public class Announcement {
     @Column(name = "education", nullable = false)
     private String education;
 
-    @Column(name = "address_name", nullable = false)
-    private String addressName;
-
-    @Column(name = "address_x", nullable = false)
-    private float addressX;
-
-    @Column(name = "address_y", nullable = false)
-    private float addressY;
-
     @Column(name = "number_recruited", nullable = false)
     private Integer numberRecruited;
 
@@ -70,9 +62,9 @@ public class Announcement {
     private List<WorkDay> workDays = new ArrayList<>(); // 시간
 
     @Builder
-    public Announcement(String title, String address, Integer hourlyRate, LocalDate workStartDate, LocalDate deadLine, Integer workingPeriod, Integer age, String gender, String education, String addressName, float addressX, float addressY, Integer numberRecruited, String content, List<WorkDay> workDays){
+    public Announcement(Owner owner, String title, Integer hourlyRate, LocalDate workStartDate, LocalDate deadLine, Integer workingPeriod, Integer age, String gender, String education, Integer numberRecruited, String content, List<WorkDay> workDays){
+        this.owner = owner;
         this.title = title;
-        this.address = address;
         this.hourlyRate = hourlyRate;
         this.workStartDate = workStartDate;
         this.deadLine = deadLine;
@@ -80,9 +72,6 @@ public class Announcement {
         this.age = age;
         this.gender = gender;
         this.education = education;
-        this.addressName = addressName;
-        this.addressX = addressX;
-        this.addressY = addressY;
         this.numberRecruited = numberRecruited;
         this.content = content;
         this.workDays = workDays;

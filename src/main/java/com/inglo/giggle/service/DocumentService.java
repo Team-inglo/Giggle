@@ -1,9 +1,6 @@
 package com.inglo.giggle.service;
 
-import com.inglo.giggle.domain.Announcement;
-import com.inglo.giggle.domain.Apply;
-import com.inglo.giggle.domain.Document;
-import com.inglo.giggle.domain.User;
+import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
 import com.inglo.giggle.dto.request.WebHookRequestDto;
@@ -13,10 +10,7 @@ import com.inglo.giggle.dto.type.EDocumentType;
 import com.inglo.giggle.dto.type.EventType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
-import com.inglo.giggle.repository.AnnouncementRepository;
-import com.inglo.giggle.repository.ApplyRepository;
-import com.inglo.giggle.repository.DocumentRepository;
-import com.inglo.giggle.repository.UserRepository;
+import com.inglo.giggle.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
@@ -38,6 +32,8 @@ public class DocumentService {
     private final UserRepository userRepository;
     private final ApplyRepository applyRepository;
     private final AnnouncementRepository announcementRepository;
+    private final ApplicantRepository applicantRepository;
+
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
@@ -116,10 +112,12 @@ public class DocumentService {
 
     private void addApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
 
+
         Apply apply = Apply.builder()
-                .user(user)
+                .applicant(applicant)
                 .announcement(announcement)
                 .step(0)
                 .status(true)
