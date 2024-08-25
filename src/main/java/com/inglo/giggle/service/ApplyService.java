@@ -5,8 +5,8 @@ import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.response.UserApplyDetailDto;
 import com.inglo.giggle.dto.response.UserApplyLogDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
-import com.inglo.giggle.dto.type.PartTimeStep;
-import com.inglo.giggle.dto.type.RequestStepCommentType;
+import com.inglo.giggle.dto.type.EPartTimeStep;
+import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.ApplyRepository;
@@ -52,7 +52,7 @@ public class ApplyService {
                         apply.getAnnouncement().getTitle(),
                         apply.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                         apply.getStep(),
-                        RequestStepCommentType.getCommentById(apply.getStep()) // apply step과 일치하는 stepComment 출력
+                        ERequestStepCommentType.getCommentById(apply.getStep()) // apply step과 일치하는 stepComment 출력
                 ))
                 .toList();
 
@@ -75,7 +75,7 @@ public class ApplyService {
                 ))
                 .toList();
 
-        List<UserApplyDetailDto.RemainingStep> remainingSteps = Arrays.stream(PartTimeStep.values())
+        List<UserApplyDetailDto.RemainingStep> remainingSteps = Arrays.stream(EPartTimeStep.values())
                 .filter(step -> step.getId() > apply.getStep())
                 .map(step -> new UserApplyDetailDto.RemainingStep(step.getId().longValue(), step.getComment()))
                 .toList();
@@ -86,7 +86,7 @@ public class ApplyService {
                 .step(apply.getStep())
                 .completedDocuments(completedDocuments)
                 .remainingSteps(remainingSteps)
-                .stepComment(RequestStepCommentType.getCommentById(apply.getStep()))
+                .stepComment(ERequestStepCommentType.getCommentById(apply.getStep()))
                 .announcementId(apply.getAnnouncement().getId())
                 .build();
 

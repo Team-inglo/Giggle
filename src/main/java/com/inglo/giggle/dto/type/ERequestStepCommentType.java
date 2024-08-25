@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum RequestStepCommentType {
+public enum ERequestStepCommentType {
     ME_WRITE_LABOR_CONTRACT(0, "표준 근로계약서를 작성해주세요."),
     EMPLOYER_WRITE_LABOR_CONTRACT(1, "고용주가 표준 근로계약서를 확인 중이에요."),
     ME_WRITE_PARTTIME_PERMITT(2, "고용주가 표준 근로계약서를 작성 완료했어요. 시간제 취업허가서를 작성해주세요."),
@@ -25,7 +25,7 @@ public enum RequestStepCommentType {
     private final String comment;
 
     public static String getCommentById(Integer id) {
-        for (RequestStepCommentType step : values()) {
+        for (ERequestStepCommentType step : values()) {
             if (step.getStep().equals(id)) {
                 return step.getComment();
             }
