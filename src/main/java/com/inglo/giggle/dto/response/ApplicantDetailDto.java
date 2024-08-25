@@ -12,7 +12,9 @@ import java.time.temporal.ChronoUnit;
 @Schema(name = "ApplicationDetailDto", description = "지원자(유학생) 상세 정보 조회 Dto")
 public record ApplicantDetailDto (
         Long userId,
-        String address,
+        String addressName,
+        Float addressX,
+        Float addressY,
         String passportNumber,
         String name,
         String sex,
@@ -32,7 +34,9 @@ public record ApplicantDetailDto (
         public static ApplicantDetailDto fromEntity(User user, Applicant applicant) {
             return ApplicantDetailDto.builder()
                     .userId(user.getId())
-                    .address(applicant.getAddress())
+                    .addressName(applicant.getAddressName())
+                    .addressX(applicant.getAddressX())
+                    .addressY(applicant.getAddressY())
                     .passportNumber(applicant.getPassportNumber())
                     .name(applicant.getName())
                     .sex(applicant.getSex())
