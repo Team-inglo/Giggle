@@ -79,21 +79,13 @@ public class Applicant {
     private String sejongInstituteScore = "0";
 
     @Builder
-    public Applicant(User user, String address, String gpa, LocalDateTime startDay, LocalDateTime endDay) {
+    public Applicant(User user) {
         this.user = user;
-        this.address = address;
-        this.gpa = gpa;
-        this.startDay = startDay;
-        this.endDay = endDay;
     }
 
     public static Applicant signUp(User user) {
         return Applicant.builder()
                 .user(user)
-                .address("")
-                .gpa("0")
-                .startDay(LocalDateTime.now())
-                .endDay(LocalDateTime.now())
                 .build();
     }
     public void updateApplicant(UpdateApplicantDto updateApplicantDto) {
