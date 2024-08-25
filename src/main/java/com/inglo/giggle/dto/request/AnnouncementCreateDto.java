@@ -2,10 +2,13 @@ package com.inglo.giggle.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.inglo.giggle.dto.type.EEducation;
+import com.inglo.giggle.dto.type.EGender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -35,33 +38,22 @@ public record AnnouncementCreateDto(
         Integer age,
 
         @JsonProperty("gender") @Schema(description = "성별(제한)", required = true)
-        String gender,
+        EGender gender,
 
         @JsonProperty("education") @Schema(description = "학력", required = true)
-        String education,
-
-        @JsonProperty("location") @Schema(description = "근무 위치 풀네임", required = true)
-        String location,
-
-        @JsonProperty("x") @Schema(description = "근무 위치 x 좌표", required = true)
-        float x,
-
-        @JsonProperty("location") @Schema(description = "근무 위치 y 좌표", required = true)
-        float y,
+        EEducation education,
 
         @JsonProperty("numberRecruited") @Schema(description = "모집 인원", required = true)
-        String numberRecruited,
+        Integer numberRecruited,
 
         @JsonProperty("content") @Schema(description = "상세 요강", required = true)
         String content
 ) {
 
         public record workDay(
-                @JsonProperty("id") @Schema(description = "요일 데이터 id", required = true)
-                Long id,
 
                 @JsonProperty("day") @Schema(description = "요일", required = true)
-                String day,
+                DayOfWeek day,
                 @JsonProperty("workStartTime") @Schema(description = "근무 시작시간", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
                 LocalTime workStartTime,
 

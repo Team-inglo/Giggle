@@ -22,7 +22,8 @@ public class OwnerController {
             @UserId Long userId,
             @RequestBody AnnouncementCreateDto request
             ) {
-        return null; // 공고 id 반환
+        Long announcementId = ownerService.createAnnounement(request, userId);
+        return announcementId; // 공고 id 반환
     }
 
     @GetMapping("/announcements")

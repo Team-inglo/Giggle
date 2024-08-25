@@ -77,4 +77,8 @@ public class Announcement {
         this.workDays = workDays;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void advanceWorkDays(List<WorkDay> workDays) {
+        this.workDays = workDays;
+    }
 }

@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,7 +26,7 @@ public class WorkDay {
     Long id;
 
     @Column(name = "day", nullable = false)
-    String day;
+    DayOfWeek day;
 
     @Column(name = "work_start_time", nullable = false)
     LocalTime workStartTime;
@@ -41,7 +42,7 @@ public class WorkDay {
     private LocalDateTime createdAt;
 
     @Builder
-    public WorkDay(String day, LocalTime workStartTime, LocalTime workEndTime, Announcement announcement, LocalDateTime createdAt){
+    public WorkDay(DayOfWeek day, LocalTime workStartTime, LocalTime workEndTime, Announcement announcement, LocalDateTime createdAt){
         this.day = day;
         this.workStartTime = workStartTime;
         this.workEndTime = workEndTime;
