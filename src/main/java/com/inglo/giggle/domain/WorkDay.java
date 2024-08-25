@@ -5,10 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,4 +36,16 @@ public class WorkDay {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "announcement_id", nullable = false)
     private Announcement announcement;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Builder
+    public WorkDay(String day, LocalTime workStartTime, LocalTime workEndTime, Announcement announcement, LocalDateTime createdAt){
+        this.day = day;
+        this.workStartTime = workStartTime;
+        this.workEndTime = workEndTime;
+        this.announcement = announcement;
+        this.createdAt = LocalDateTime.now();
+    }
 }

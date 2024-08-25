@@ -85,7 +85,7 @@ public class Announcement {
         this.addressY = addressY;
         this.numberRecruited = numberRecruited;
         this.content = content;
-        this.createdAt = LocalDateTime.now();
         this.workDays = workDays;
+        this.createdAt = LocalDateTime.now();
     }
 }
