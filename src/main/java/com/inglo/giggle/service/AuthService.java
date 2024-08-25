@@ -13,11 +13,19 @@ import com.inglo.giggle.repository.ApplicantFileRepository;
 import com.inglo.giggle.repository.ApplicantRepository;
 import com.inglo.giggle.repository.OwnerRepository;
 import com.inglo.giggle.repository.UserRepository;
+import com.inglo.giggle.security.handler.login.DefaultSuccessHandler;
 import com.inglo.giggle.utility.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +36,8 @@ public class AuthService {
     private final OwnerRepository ownerRepository;
     private final ApplicantFileRepository applicantFileRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final DefaultSuccessHandler defaultSuccessHandler;
 
     @Transactional
     public boolean checkDuplicate(String serialId) { // 아이디 중복 검사. 단, 아이디가 존재하더라도 그 계정의 데이터가 비어있다면 삭제하고 중복이 아닌 것으로 간주
@@ -60,25 +70,30 @@ public class AuthService {
     }
 
     @Transactional
-    public JwtTokenDto signUp(AuthSignUpDto authSignUpDto) { // 아이디 비밀번호 등록 시, User와 UserFile을 생성
+    public void signUp(AuthSignUpDto authSignUpDto, HttpServletRequest request, HttpServletResponse response) throws IOException { // 아이디 비밀번호 등록 시, User와 UserFile을 생성
         ERole role = ERole.fromName(authSignUpDto.role());
         User user;
         if (role == ERole.APPLICANT) {
             user = userRepository.save(
                     User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()), role)
             );
-            Applicant applicant = applicantRepository.save(Applicant.signUp(user));
-            applicantFileRepository.save(ApplicantFile.signUp(applicant));
-        }
-        else {
+            Applicant applicant = applicantRepository.saveAndFlush(Applicant.signUp(user));
+
+            applicantFileRepository.saveAndFlush(ApplicantFile.signUp(applicant));
+       } else {
             user = userRepository.save(
                     User.signUp(authSignUpDto, bCryptPasswordEncoder.encode(authSignUpDto.password()), role)
             );
-            ownerRepository.save(Owner.signUp(user));
+            ownerRepository.saveAndFlush(Owner.signUp(user));
         }
-        JwtTokenDto jwtTokenDto = jwtUtil.generateTokens(user.getId(), user.getRole());
-        user.updateRefreshToken(jwtTokenDto.refreshToken());
-        return jwtTokenDto;
+        // 회원가입 후 자동 로그인 처리
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(authSignUpDto.serialId(), authSignUpDto.password());
+
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+        // 로그인 성공 핸들러 호출하여 JWT 토큰 발급 및 응답 처리
+        defaultSuccessHandler.onAuthenticationSuccess(request, response, authentication);
     }
 
     @Transactional
