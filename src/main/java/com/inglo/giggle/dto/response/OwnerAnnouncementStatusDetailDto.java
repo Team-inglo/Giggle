@@ -8,8 +8,8 @@ import java.util.List;
 public record OwnerAnnouncementStatusDetailDto(
         @JsonProperty("title") @Schema(description = "공고 제목")
         String title,
-        @JsonProperty("location") @Schema(description = "일자리 위치")
-        String location,
+        @JsonProperty("addressName") @Schema(description = "일자리 위치")
+        String addressName,
         @JsonProperty("completor") @Schema(description = "서류 완료자 수")
         Integer completor,
         @JsonProperty("applicant") @Schema(description = "지원자 수")

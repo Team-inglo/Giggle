@@ -25,8 +25,8 @@ public record OwnerAnnouncementStatusListDto(
             @JsonProperty("title") @Schema(description = "제목")
             String title,
 
-            @JsonProperty("location") @Schema(description = "위치")
-            String location,
+            @JsonProperty("addressName") @Schema(description = "위치")
+            String addressName,
 
             @JsonProperty("completor") @Schema(description = "서류완료자 수")
             Integer completor,

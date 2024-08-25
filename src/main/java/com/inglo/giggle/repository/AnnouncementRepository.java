@@ -4,6 +4,7 @@ import com.inglo.giggle.domain.Announcement;
 import com.inglo.giggle.domain.Applicant;
 import com.inglo.giggle.domain.Apply;
 import com.inglo.giggle.domain.Owner;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +12,7 @@ import java.util.List;
 
 @Repository
 public interface AnnouncementRepository extends JpaRepository<Announcement, Long> {
-    List<Announcement> findByOwner(Owner owner);
+    List<Announcement> findByOwner(Owner owner, Sort sort);
+
+    List<Announcement> findByJobType(Owner owner, Sort sort);
 }

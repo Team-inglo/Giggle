@@ -19,19 +19,22 @@ public record AnnouncementCreateDto(
         @JsonProperty("title") @Schema(description = "공고 제목", required = true)
         String title,
 
-        @JsonProperty("deadLine") @Schema(description = "마감일자", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        @JsonProperty("job_type") @Schema(description = "업직종", required = true)
+        String jobType,
+
+        @JsonProperty("dead_line") @Schema(description = "마감일자", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDate deadline,
 
-        @JsonProperty("hourlyWage") @Schema(description = "시급", required = true)
+        @JsonProperty("hourly_wage") @Schema(description = "시급", required = true)
         Integer hourlyWage,
 
-        @JsonProperty("workStartDate") @Schema(description = "근무 시작일자", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        @JsonProperty("work_start_date") @Schema(description = "근무 시작일자", required = true) @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDate workStartDate,
 
-        @JsonProperty("workingPeriod") @Schema(description = "근무 기간(개월 단위)", required = true)
+        @JsonProperty("working_period") @Schema(description = "근무 기간(개월 단위)", required = true)
         Integer workingPeriod,
 
-        @JsonProperty("workDays") @Schema(description = "요일", required = true)
+        @JsonProperty("work_days") @Schema(description = "요일", required = true)
         List<workDay> workDays,
 
         @JsonProperty("age") @Schema(description = "나이(제한)", required = true)
@@ -43,7 +46,7 @@ public record AnnouncementCreateDto(
         @JsonProperty("education") @Schema(description = "학력", required = true)
         EEducation education,
 
-        @JsonProperty("numberRecruited") @Schema(description = "모집 인원", required = true)
+        @JsonProperty("number_recruited") @Schema(description = "모집 인원", required = true)
         Integer numberRecruited,
 
         @JsonProperty("content") @Schema(description = "상세 요강", required = true)

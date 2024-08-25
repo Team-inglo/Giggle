@@ -32,6 +32,7 @@ public class OwnerService {
         Announcement announcement = Announcement.builder()
                 .owner(owner)
                 .title(request.title())
+                .jobType(request.jobType())
                 .hourlyRate(request.hourlyWage())
                 .workStartDate(request.workStartDate())
                 .deadLine(request.deadline())

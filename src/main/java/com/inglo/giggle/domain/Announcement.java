@@ -28,6 +28,9 @@ public class Announcement {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "job_type", nullable = false)
+    private String jobType;
+
     @Column(name = "hourly_rate", nullable = false)
     private Integer hourlyRate;
 
@@ -62,9 +65,10 @@ public class Announcement {
     private List<WorkDay> workDays = new ArrayList<>(); // 시간
 
     @Builder
-    public Announcement(Owner owner, String title, Integer hourlyRate, LocalDate workStartDate, LocalDate deadLine, Integer workingPeriod, Integer age, String gender, String education, Integer numberRecruited, String content, List<WorkDay> workDays){
+    public Announcement(Owner owner, String title, String jobType, Integer hourlyRate, LocalDate workStartDate, LocalDate deadLine, Integer workingPeriod, Integer age, String gender, String education, Integer numberRecruited, String content, List<WorkDay> workDays){
         this.owner = owner;
         this.title = title;
+        this.jobType = jobType;
         this.hourlyRate = hourlyRate;
         this.workStartDate = workStartDate;
         this.deadLine = deadLine;
