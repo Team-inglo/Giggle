@@ -21,8 +21,8 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
     // 6371은 지구 반경을 km 단위로 표현한 값
     // 거리 순으로 정렬
     @Query("SELECT a FROM Announcement a WHERE " +
-            "(6371 * acos(cos(radians(:userLat)) * cos(radians(a.owner.storeAddressX)) * " +
-            "cos(radians(a.owner.storeAddressY) - radians(:userLng)) + sin(radians(:userLat)) * " +
+            "(6371 * acos(cos(radians(:userAddressX)) * cos(radians(a.owner.storeAddressX)) * " +
+            "cos(radians(a.owner.storeAddressY) - radians(:userAddressY)) + sin(radians(:userAddressX)) * " +
             "sin(radians(a.owner.storeAddressX)))) <= :maxDistance")
     List<Announcement> findByOwnerLocationWithin(@Param("userAddressX") Double userAddressX,
                                                  @Param("userAddressY") Double userAddressY,
