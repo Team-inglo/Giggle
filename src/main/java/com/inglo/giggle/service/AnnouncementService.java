@@ -4,9 +4,11 @@ import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.domain.Announcement;
 import com.inglo.giggle.domain.Owner;
 import com.inglo.giggle.domain.User;
+import com.inglo.giggle.domain.WorkDay;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
+import com.inglo.giggle.dto.response.AnnouncementDetailDto;
 import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.dto.type.EAnnouncementPeriod;
@@ -23,11 +25,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -135,4 +138,45 @@ public class AnnouncementService {
         return announcements;
     }
 
+    public AnnouncementDetailDto getAnnouncementDetails(Long userId, Long announcementId) {
+        userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        // 요일을 시작 시간과 종료 시간으로 그룹화
+        Map<String, List<DayOfWeek>> groupedByTime = announcement.getWorkDays().stream()
+                .collect(Collectors.groupingBy(
+                        workDay -> workDay.getWorkStartTime().toString() + "-" + workDay.getWorkEndTime().toString(),
+                        LinkedHashMap::new,  // 순서를 유지하기 위해 LinkedHashMap 사용
+                        Collectors.mapping(WorkDay::getDay, Collectors.toList())
+                ));
+
+        // 요일을 ','로, 시간 그룹을 '/'로 구분하여 문자열 생성
+        String workDaysString = groupedByTime.entrySet().stream()
+                .map(entry -> entry.getValue().stream()
+                        .map(day -> day.getDisplayName(TextStyle.SHORT, Locale.KOREAN))
+                        .collect(Collectors.joining(","))
+                )
+                .collect(Collectors.joining("/"));
+
+        // 시간 그룹을 '/'로 구분하여 문자열 생성
+        String workTimesString = String.join("/", groupedByTime.keySet());
+
+        AnnouncementDetailDto announcementDetailDto = AnnouncementDetailDto.builder()
+                .title(announcement.getTitle())
+                .deadline(announcement.getDeadLine())
+                .hourlyWage(announcement.getHourlyRate())
+                .workStartDate(announcement.getWorkStartDate())
+                .workingPeriod(announcement.getWorkingPeriod())
+                .workDays(workDaysString)  // 요일 정보
+                .workTimes(workTimesString)  // 시간 정보
+                .age(announcement.getAge())
+                .gender(announcement.getGender())
+                .education(announcement.getEducation())
+                .addressName(announcement.getOwner().getStoreAddressName())
+                .numberRecruited(announcement.getNumberRecruited())
+                .content(announcement.getContent())
+                .build();
+
+        return announcementDetailDto;
+    }
 }
