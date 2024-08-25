@@ -2,9 +2,12 @@ package com.inglo.giggle.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
+@Schema(name = "OwnerAnnouncementStatusDetail", description = "고용주가 등록한 아르바이트 공고 상태 상세 조회")
 public record OwnerAnnouncementStatusDetailDto(
         @JsonProperty("title") @Schema(description = "공고 제목")
         String title,

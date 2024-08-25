@@ -1,20 +1,19 @@
 package com.inglo.giggle.service;
 
-import com.inglo.giggle.domain.Announcement;
-import com.inglo.giggle.domain.Owner;
-import com.inglo.giggle.domain.User;
-import com.inglo.giggle.domain.WorkDay;
+import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.response.AnnouncementListDto;
+import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
+import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
-import com.inglo.giggle.repository.AnnouncementRepository;
-import com.inglo.giggle.repository.OwnerRepository;
-import com.inglo.giggle.repository.UserRepository;
-import com.inglo.giggle.repository.WorkDayRepository;
+import com.inglo.giggle.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -23,6 +22,7 @@ public class OwnerService {
     private final OwnerRepository ownerRepository;
     private final UserRepository userRepository;
     private final AnnouncementRepository announcementRepository;
+    private final ApplyRepository applyRepository;
 
     // 아르바이트 공고 생성 post method
     public Long createAnnounement(AnnouncementCreateDto request, Long userId) {
@@ -57,5 +57,66 @@ public class OwnerService {
         announcementRepository.save(announcement);
 
         return announcement.getId();
+    }
+
+    // 아르바이트 공고 상태 리스트 조회
+    public OwnerAnnouncementStatusListDto getOwnerAnnouncementStatusList(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
+        Sort sort = Sort.by(Sort.Direction.ASC, "createdAt"); // 오름차순 정렬
+
+        List<Announcement> announcements = announcementRepository.findByOwner(owner, sort);
+
+        List<OwnerAnnouncementStatusListDto.AnnouncementStatus> announcementDtos = announcements.stream()
+                .map(announcement -> {
+                    List<Apply> applies = applyRepository.findByAnnouncement(announcement); // 신청 로그 가져오기
+
+                    // applies의 전체 개수
+                    int totalApplies = applies.size();
+
+                    // applies 중 status == false 개수
+                    long falseStatusApplies = applies.stream()
+                            .filter(apply -> !apply.getStatus()) // status가 false인 경우
+                            .count();
+
+                    return new OwnerAnnouncementStatusListDto.AnnouncementStatus(
+                            announcement.getId(),
+                            announcement.getTitle(),
+                            announcement.getOwner().getStoreAddressName(),
+                            totalApplies,
+                            (int) falseStatusApplies,
+                            announcement.getDeadLine(),
+                            (int) ChronoUnit.DAYS.between(LocalDate.now(), announcement.getDeadLine()) // 날짜 차이를 일수로 계산
+                    );
+                })
+                .toList();
+
+        // 진행 중 apply count
+        long progressAnnouncementCount = announcements.stream()
+                .filter(announcement -> !applyRepository.findByAnnouncement(announcement).isEmpty()) // apply가 존재하는 announcement 필터링
+                .filter(announcement -> announcement.getDeadLine().isAfter(LocalDate.now())) // 마감 기한이 현재 날짜보다 이후인 announcement 필터링
+                .count();
+
+        // 종료 서류 count
+        long doneAnnouncementCount = announcements.stream()
+                .filter(announcement -> !applyRepository.findByAnnouncement(announcement).isEmpty()) // apply가 존재하는 announcement 필터링
+                .filter(announcement -> announcement.getDeadLine().isBefore(LocalDate.now())) // 마감 기한이 현재 날짜보다 이전인 announcement 필터링
+                .count();
+
+        OwnerAnnouncementStatusListDto ownerAnnouncementStatusListDto = OwnerAnnouncementStatusListDto.builder()
+                .progressCompletor((int)progressAnnouncementCount)
+                .doneCompletor((int)doneAnnouncementCount)
+                .announcementStatuses(announcementDtos)
+                .build();
+
+        return ownerAnnouncementStatusListDto;
+    }
+
+    // 아르바이트 공소 상태 상세 조회
+    public OwnerAnnouncementStatusDetailDto getOwnerAnnouncementStatusDetails(Long userId, Long announcementId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        return null;
     }
 }
