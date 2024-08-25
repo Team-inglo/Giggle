@@ -50,7 +50,6 @@ public class AuthService {
             );
             ownerRepository.save(Owner.signUp(user));
         }
-
     }
 
     @Transactional

@@ -32,13 +32,21 @@ public class Owner {
     @Column(name = "store_address", nullable = false)
     private String storeAddress;
 
+    @Column(name = "store_phone_number", nullable = false)
+    private String storePhoneNumber;
+
+    @Column(name = "store_email", nullable = false)
+    private String storeEmail;
+
     @Builder
-    public Owner(User user, String ownerRegistrationNumber, String ownerName, String storeName, String storeAddress){
+    public Owner(User user, String ownerRegistrationNumber, String ownerName, String storeName, String storeAddress, String storePhoneNumber, String storeEmail){
         this.user = user;
         this.ownerRegistrationNumber = ownerRegistrationNumber;
         this.ownerName = ownerName;
         this.storeName = storeName;
         this.storeAddress = storeAddress;
+        this.storePhoneNumber = storePhoneNumber;
+        this.storeEmail = storeEmail;
     }
 
     public static Owner signUp(User user) {
