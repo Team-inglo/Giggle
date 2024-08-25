@@ -1,9 +1,11 @@
 package com.inglo.giggle.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Builder
@@ -17,18 +19,18 @@ public record OwnerAnnouncementStatusDetailDto(
         Integer completor,
         @JsonProperty("applicant") @Schema(description = "지원자 수")
         Integer applicant,
-        @JsonProperty("dealLine") @Schema(description = "모집 마감일")
-        String dealLine,
+        @JsonProperty("dealLine") @Schema(description = "모집 마감일") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+        LocalDate dealLine,
         @JsonProperty("applicantsStatuses") @Schema(description = "지원자 상태 배열")
         List<applicantsStatus> applicantsStatuses
 ) {
     public record applicantsStatus(
-            @JsonProperty("id") @Schema(description = "id")
-            Long id,
+            @JsonProperty("applyId") @Schema(description = "서류 신청 id")
+            Long applyId,
             @JsonProperty("name") @Schema(description = "지원자 이름")
             String name,
-            @JsonProperty("dateOfApplication") @Schema(description = "지원 날짜")
-            String dateOfApplication, // yyyy-mm-dd
+            @JsonProperty("dateOfApplication") @Schema(description = "지원 날짜") @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+            LocalDate dateOfApplication, // yyyy-mm-dd
             @JsonProperty("statusComment") @Schema(description = "상태 메시지")
             String statusComment,
             @JsonProperty("employmentContractUrl") @Schema(description = "근로계약서 url")
