@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
 @Table(name = "applicant")
 public class Applicant {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "applicant_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @MapsId
+    @JoinColumn(name = "applicant_id")
     private User user;
 
     @Column(name = "address")

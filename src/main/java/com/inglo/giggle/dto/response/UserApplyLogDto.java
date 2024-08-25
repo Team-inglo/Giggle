@@ -14,7 +14,7 @@ public record UserApplyLogDto(
         ){
     public record DocumentSpec(
             @JsonProperty("name") String name,
-            @JsonProperty("date") LocalDate startDate,
+            @JsonProperty("startDate") String startDate,
             @JsonProperty("step") Integer step,
             @JsonProperty("stepComment") String stepComment
     ) {

@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_file")
+@Table(name = "applicant_file")
 public class ApplicantFile {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "applicant_file_id", nullable = false)
     private Long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @MapsId
-    @JoinColumn(name = "applicant_id")
+    @JoinColumn(name = "applicant_file_id")
     private Applicant applicant;
 
     @Column(name = "passport_file_url")

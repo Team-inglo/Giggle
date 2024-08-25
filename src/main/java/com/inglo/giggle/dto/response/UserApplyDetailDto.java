@@ -11,15 +11,24 @@ import java.util.List;
 @Schema(name = "ApplyDetail", description = "사용자 작성 서류 상태 상세")
 public record UserApplyDetailDto (
         @JsonProperty("name") String name,
-        @JsonProperty("date") LocalDate startDate,
+        @JsonProperty("startDate") String startDate,
         @JsonProperty("step") Integer step,
-        @JsonProperty("documentUrl") String documentUrl,
+        @JsonProperty("completedDocuments") List<CompletedDocument> completedDocuments,
         @JsonProperty("remainingSteps") List<RemainingStep> remainingSteps,
-        @JsonProperty("stepComment") String stepComment
+        @JsonProperty("stepComment") String stepComment,
+        @JsonProperty("announcementId") Long announcementId
         ) {
+
+        public record CompletedDocument (
+                @JsonProperty("id") Long id,
+                @JsonProperty("name") String name,
+                @JsonProperty("url") String url
+
+        ) {}
 
         public record RemainingStep (
                 @JsonProperty("id") Long id,
                 @JsonProperty("content") String content
         ) {}
+
 }
