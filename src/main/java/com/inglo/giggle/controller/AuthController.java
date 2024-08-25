@@ -17,6 +17,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "인증 관련 API")
@@ -34,10 +36,12 @@ public class AuthController {
 
     @PostMapping("/auth/sign-up")
     @Operation(summary = "Default 회원가입", description = "Default 회원가입을 진행합니다.")
-    public ResponseDto<?> signUp(
-            @RequestBody @Valid AuthSignUpDto authSignUpDto
-            ) {
-        return ResponseDto.created(authService.signUp(authSignUpDto));
+    public void signUp(
+            @RequestBody @Valid AuthSignUpDto authSignUpDto,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        authService.signUp(authSignUpDto, request, response);
     }
 
     @PostMapping("/auth/reissue")

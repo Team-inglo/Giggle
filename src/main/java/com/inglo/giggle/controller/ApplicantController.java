@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ApplicantController {
     private final ApplicantService applicantService;
 
-    @PostMapping(value = "/passport", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/passport")
     @Operation(summary = "여권 등록", description = "여권 정보를 등록합니다.")
     public ResponseDto<?> updatePassport(
             @UserId Long userId,
@@ -28,7 +28,7 @@ public class ApplicantController {
         return ResponseDto.ok(null);
     }
 
-    @PostMapping(value = "/registration", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/registration")
     @Operation(summary = "외국인 등록증 등록", description = "외국인 등록증을 등록합니다.")
     public ResponseDto<?> updateRegistration(
             @UserId Long userId,
@@ -48,18 +48,17 @@ public class ApplicantController {
         return ResponseDto.ok(null);
     }
 
-    @PostMapping(value = "/topik", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/topik")
     @Operation(summary = "스펙 등록(토픽)", description = "토픽 자격증을 등록하여 본인 정보를 업데이트합니다.")
     public ResponseDto<?> updateTopik(
             @UserId Long userId,
             @RequestPart(value = "file", required = false)
             MultipartFile file) {
-        // ToDo: OCR 사용하여 자격증 파일 읽어와, 자격증 정보를 등록하고, 유저 정보 업데이트
         applicantService.updateTopik(userId, file);
         return ResponseDto.ok(null);
     }
 
-    @PostMapping(value = "/social-integration-program", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/social-integration-program")
     @Operation(summary = "스펙 등록(사회통합프로그램)", description = "사회통합프로그램 자격증을 등록하여 본인 정보를 업데이트합니다.")
     public ResponseDto<?> updateSocialIntegrationProgram(
             @UserId Long userId,
@@ -69,7 +68,7 @@ public class ApplicantController {
         return ResponseDto.ok(null);
     }
 
-    @PostMapping(value = "/sejong-institute", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/sejong-institute")
     @Operation(summary = "스펙 등록(세종학당)", description = "세종학당 자격증을 등록하여 본인 정보를 업데이트합니다.")
     public ResponseDto<?> updateSejongInstitute(
             @UserId Long userId,

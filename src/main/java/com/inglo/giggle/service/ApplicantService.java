@@ -3,15 +3,14 @@ package com.inglo.giggle.service;
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.domain.Applicant;
 import com.inglo.giggle.domain.ApplicantFile;
-import com.inglo.giggle.domain.User;
 import com.inglo.giggle.dto.request.UpdateApplicantDto;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.ApplicantFileRepository;
 import com.inglo.giggle.repository.ApplicantRepository;
-import com.inglo.giggle.repository.UserRepository;
 import com.inglo.giggle.utility.ImageUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ApplicantService {
-    private final UserRepository userRepository;
     private final ApplicantRepository applicantRepository;
     private final ApplicantFileRepository applicantFileRepository;
     private final ImageUtil imageUtil;
@@ -58,23 +56,25 @@ public class ApplicantService {
             currentPassportFileUrl = imageUtil.uploadPassportImageFile(file, userId);
             applicantFile.uploadPassportFile(currentPassportFileUrl);
         } catch (Exception e) {
-            imageUtil.deleteImageFile(currentPassportFileUrl);
+            log.error("Passport file upload error", e);
             throw new CommonException(ErrorCode.UPLOAD_FILE_ERROR);
         }
         try {
             String base64Image = imageUtil.encodeImageToBase64(file);
             String jsonResponse = callGoogleVisionApi(base64Image);
-
             // JSON 응답 파싱
             JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
             JSONObject responseJson = (JSONObject) parser.parse(jsonResponse);
             JSONObject responses = (JSONObject) ((net.minidev.json.JSONArray) responseJson.get("responses")).get(0);
-            JSONObject textAnnotation = (JSONObject) ((net.minidev.json.JSONArray) responses.get("textAnnotations")).get(0);
-            String description = (String) textAnnotation.get("description");
 
-            String[] lines = description.split("\n");
+            // fullTextAnnotation 객체 가져오기
+            JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
+            String text = (String) fullTextAnnotation.get("text");
+
+            // 텍스트를 줄 단위로 분리
+            String[] lines = text.split("\n");
             String passportNumber = null;
-            StringBuilder name = null;
+            String name = null;
             String sex = null;
             String dob = null;
             String nationality = null;
@@ -82,25 +82,23 @@ public class ApplicantService {
             String passportExpiryDate = null;
 
             for (String line : lines) {
-                if (line.contains("Passport No.")) {
-                    passportNumber = line.substring(line.indexOf("\n") + 1).trim(); // "Passport No." 다음 줄에서 여권 번호 추출
-                } else if (line.contains("Given names")) {
-                    name = new StringBuilder(line.substring(line.indexOf("\n") + 1).trim()); // "Given names" 다음 줄에서 이름 추출
-                } else if (line.contains("Surname") && name != null) {
-                    name.append(line.substring(line.indexOf("\n") + 1).trim()); // "Surname" 다음 줄에서 성 추출
-                } else if (line.contains("Sex")) {
-                    sex = line.substring(line.indexOf("\n") + 1).trim();
-                } else if (line.contains("Date of birth")) {
-                    dob = line.substring(line.indexOf("\n") + 1).trim(); // "Date of birth" 다음 줄에서 생년월일 추출
-                } else if (line.contains("Nationality")) {
-                    nationality = line.substring(line.indexOf("\n") + 1).trim(); // "Nationality" 다음 줄에서 국적 추출
-                } else if (line.contains("Date of issue")) {
-                    passportIssueDate = line.substring(line.indexOf("\n") + 1).trim(); // "Date of issue" 다음 줄에서 발급일 추출
-                } else if (line.contains("Date of expiry")) {
-                    passportExpiryDate = line.substring(line.indexOf("\n") + 1).trim(); // "Date of expiry" 다음 줄에서 만료일 추출
+                int index = Arrays.asList(lines).indexOf(line);
+
+                if (line.contains("여권번호/ Passport No.")) {
+                    passportNumber = lines[index + 2].trim(); // 여권번호는 "Passport No." 다다음 줄에서 추출
+                } else if (line.contains("이름/Given names")) {
+                    name = lines[index + 1].trim(); // 이름은 "Given names" 다음 줄에서 추출
+                } else if (line.contains("성별/Sex")) {
+                    sex = lines[index + 1].trim(); // 성별은 "Sex" 다음 줄에서 추출
+                } else if (line.contains("국적/ Nationality")) {
+                    nationality = lines[index + 1].trim(); // 국적은 "Nationality" 다음 줄에서 추출
+                } else if (line.contains("발급일/ Date of issue")) {
+                    passportIssueDate = formatDate(lines[index + 1].trim()); // 발급일은 "Date of issue" 다음 줄에서 추출
+                    passportExpiryDate = formatDate(lines[index + 2].trim()); // 만료일은 발급일 바로 다음 줄에서 추출
+                } else if (line.contains("기간만료일/ Date of expirty")) {
+                    dob = formatDate(lines[index + 1].trim()); // 만료일은 "Date of expiry" 다음 줄에서 추출
                 }
             }
-
             if (passportNumber == null || name == null || sex == null || dob == null || nationality == null || passportIssueDate == null || passportExpiryDate == null) {
                 StringBuilder missingFields = new StringBuilder();
                 if (passportNumber == null) missingFields.append("passportNumber ");
@@ -120,6 +118,7 @@ public class ApplicantService {
                 }
             }
         } catch (Exception e) {
+            log.error("Passport file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -151,28 +150,31 @@ public class ApplicantService {
             JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
             JSONObject responseJson = (JSONObject) parser.parse(jsonResponse);
             JSONObject responses = (JSONObject) ((net.minidev.json.JSONArray) responseJson.get("responses")).get(0);
-            JSONObject textAnnotation = (JSONObject) ((net.minidev.json.JSONArray) responses.get("textAnnotations")).get(0);
-            String description = (String) textAnnotation.get("description");
+            // fullTextAnnotation 객체 가져오기
+            JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
+            String text = (String) fullTextAnnotation.get("text");
 
-            String[] lines = description.split("\n");
+            // 텍스트를 줄 단위로 분리
+            String[] lines = text.split("\n");
             String registrationNumber = null;
             String statusOfResidence = null;
             String registrationIssueDate = null;
 
             for (String line : lines) {
-                if (line.contains("외국인") && line.contains("-")) {
-                    // 해당 줄에서 "123456-1234567" 형식의 외국인 등록번호 찾기
-                    Pattern pattern = Pattern.compile("\\b\\d{6}-\\d{7}\\b"); // "123456-1234567" 형식을 찾습니다.
-                    Matcher matcher = pattern.matcher(line);
-                    if (matcher.find()) {
-                        registrationNumber = matcher.group(); // 첫 번째 일치하는 번호가 외국인 등록번호입니다.
-                    }
-                } else if (line.contains("Status of residence")) {
-                    statusOfResidence = line.substring(line.indexOf("\n") + 1).trim(); // "Status of residence" 다음 줄에서 체류 상태 추출
-                } else if (line.contains("Date of issue")) {
-                    registrationIssueDate = line.substring(line.indexOf("\n") + 1).trim(); // "Date of issue" 다음 줄에서 발급일 추출
+                int index = Arrays.asList(lines).indexOf(line);
+
+                if (line.contains("외국인등록번호")) {
+                    // "외국인등록번호" 줄에서 추출
+                    registrationNumber = line.substring(line.indexOf("외국인등록번호") + 7).trim();
+                } else if (line.contains("체류자격")) {
+                    // "체류자격" 줄에서 추출
+                    statusOfResidence = line.substring(line.indexOf("체류자격") + 4).trim();
+                } else if (line.contains("발급일자")) {
+                    // "발급일자 Issue Date" 문자열 내에서 발급일을 추출
+                    registrationIssueDate = line.substring(line.indexOf("발급일자 Issue Date") + 15).trim();
                 }
             }
+
 
             if (registrationNumber == null || statusOfResidence == null || registrationIssueDate == null) {
                 StringBuilder missingFields = new StringBuilder();
@@ -190,6 +192,7 @@ public class ApplicantService {
             }
 
         } catch (Exception e) {
+            log.error("Registration file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -206,20 +209,22 @@ public class ApplicantService {
             JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
             JSONObject responseJson = (JSONObject) parser.parse(jsonResponse);
             JSONObject responses = (JSONObject) ((net.minidev.json.JSONArray) responseJson.get("responses")).get(0);
-            JSONObject textAnnotation = (JSONObject) ((net.minidev.json.JSONArray) responses.get("textAnnotations")).get(0);
-            String description = (String) textAnnotation.get("description");
+            // fullTextAnnotation 객체 가져오기
+            JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
+            String text = (String) fullTextAnnotation.get("text");
 
-            String[] lines = description.split("\n");
+            // 텍스트를 줄 단위로 분리
+            String[] lines = text.split("\n");
             String topikScore = null;
 
             for (String line : lines) {
-                // TODO: 토픽 증명서에서 필요한 정보 추출
+                // 만약 line이 앞에 숫자 하나와 '급'이라는 문자만 포함하고 있다면 ex) 6급
+                if (line.matches("^\\d급$")) {
+                    topikScore = line;
+                }
             }
-
             if (topikScore == null) {
-                StringBuilder missingFields = new StringBuilder();
-                // TODO : 필요한 정보가 없을 때 처리
-                throw new CommonException(ErrorCode.INVALID_TOPIK_FILE, "Missing Fields: " + missingFields.toString());
+                throw new CommonException(ErrorCode.INVALID_TOPIK_FILE, "Missing Fields: " + "topikScore");
             } else {
                 applicant.registerTopik(topikScore);
             }
@@ -240,23 +245,27 @@ public class ApplicantService {
             JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
             JSONObject responseJson = (JSONObject) parser.parse(jsonResponse);
             JSONObject responses = (JSONObject) ((net.minidev.json.JSONArray) responseJson.get("responses")).get(0);
-            JSONObject textAnnotation = (JSONObject) ((net.minidev.json.JSONArray) responses.get("textAnnotations")).get(0);
-            String description = (String) textAnnotation.get("description");
+            // fullTextAnnotation 객체 가져오기
+            JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
+            String text = (String) fullTextAnnotation.get("text");
 
-            String[] lines = description.split("\n");
+            // 텍스트를 줄 단위로 분리
+            String[] lines = text.split("\n");
             String socialIntegrationProgramScore = null;
 
             for (String line : lines) {
-                //TODO: 사회통합프로그램 증명서에서 필요한 정보 추출
+                int index = Arrays.asList(lines).indexOf(line);
+                if (line.equals("교육")) {
+                    socialIntegrationProgramScore = lines[index + 1].trim();
+                }
             }
             if (socialIntegrationProgramScore == null) {
-                StringBuilder missingFields = new StringBuilder();
-                //TODO: 필요한 정보가 없을 때 처리
-                throw new CommonException(ErrorCode.INVALID_SOCIAL_INTEGRATION_PROGRAM_FILE, "Missing Fields: " + missingFields.toString());
+                throw new CommonException(ErrorCode.INVALID_SOCIAL_INTEGRATION_PROGRAM_FILE, "Missing Fields: socialIntegrationProgramScore" );
             } else {
                 applicant.registerSocialIntegrationProgram(socialIntegrationProgramScore);
             }
         } catch (Exception e) {
+            log.error("Social Integration Program file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -273,20 +282,30 @@ public class ApplicantService {
             JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
             JSONObject responseJson = (JSONObject) parser.parse(jsonResponse);
             JSONObject responses = (JSONObject) ((net.minidev.json.JSONArray) responseJson.get("responses")).get(0);
-            JSONObject textAnnotation = (JSONObject) ((net.minidev.json.JSONArray) responses.get("textAnnotations")).get(0);
-            String description = (String) textAnnotation.get("description");
+            // fullTextAnnotation 객체 가져오기
+            JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
+            String text = (String) fullTextAnnotation.get("text");
 
-            String[] lines = description.split("\n");
+            // 텍스트를 줄 단위로 분리
+            String[] lines = text.split("\n");
             String sejongInstituteScore = null;
 
             for (String line : lines) {
-                //TODO: 세종학당 증명서에서 필요한 정보 추출
+                int index = Arrays.asList(lines).indexOf(line);
+                if (line.contains("Total Score")) {
+                    sejongInstituteScore = lines[index + 3].substring(0,3).trim();
+                }
             }
             if (sejongInstituteScore == null) {
-                StringBuilder missingFields = new StringBuilder();
-                //TODO: 필요한 정보가 없을 때 처리
-                throw new CommonException(ErrorCode.INVALID_SEJONG_INSTITUTE_FILE, "Missing Fields: " + missingFields.toString());
+                throw new CommonException(ErrorCode.INVALID_SEJONG_INSTITUTE_FILE, "Missing Fields: sejongInstituteScore");
             } else {
+                if(Integer.parseInt(sejongInstituteScore)<108) sejongInstituteScore = "0";
+                else if(Integer.parseInt(sejongInstituteScore)<216) sejongInstituteScore = "1";
+                else if(Integer.parseInt(sejongInstituteScore)<296) sejongInstituteScore = "2";
+                else if(Integer.parseInt(sejongInstituteScore)<401) sejongInstituteScore = "3";
+                else if(Integer.parseInt(sejongInstituteScore)<496) sejongInstituteScore = "4";
+                else if(Integer.parseInt(sejongInstituteScore)<581) sejongInstituteScore = "5";
+                else sejongInstituteScore = "6";
                 applicant.registerSejongInstitute(sejongInstituteScore);
             }
         } catch (Exception e) {
@@ -317,5 +336,14 @@ public class ApplicantService {
                 + "  }"
                 + "]"
                 + "}";
+    }
+    private String formatDate(String input) {
+        // 첫 번째로 나오는 두 자리 숫자를 day로 추출
+        String day = input.substring(0, 2).trim();
+        // 유일한 영어 대문자를 month로 추출
+        String month = input.replaceAll("[^A-Z]", "").trim();
+        // 맨 끝 4자리만 year로 추출
+        String year = input.substring(input.length()-4).trim();
+        return day + " " + month + " " + year;
     }
 }
