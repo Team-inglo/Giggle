@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
 
-    @GetMapping("/auth/email-duplicate")
-    @Operation(summary = "이메일 중복 확인", description = "이메일 중복을 확인합니다.")
+    @GetMapping("/auth/id-duplicate")
+    @Operation(summary = "아이디 중복 확인", description = "아이디 중복을 확인합니다.")
     public ResponseDto<?> checkDuplicate(
-            @RequestParam(value = "email") String email
+            @RequestParam(value = "serial_id") String serialId
     ) {
-        return ResponseDto.ok(authService.checkDuplicate(email));
+        return ResponseDto.ok(authService.checkDuplicate(serialId));
     }
 
     @PostMapping("/auth/sign-up")
@@ -37,9 +37,7 @@ public class AuthController {
     public ResponseDto<?> signUp(
             @RequestBody @Valid AuthSignUpDto authSignUpDto
             ) {
-        authService.signUp(authSignUpDto);
-
-        return ResponseDto.ok(null);
+        return ResponseDto.created(authService.signUp(authSignUpDto));
     }
 
     @PostMapping("/auth/reissue")
