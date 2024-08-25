@@ -1,5 +1,7 @@
 package com.inglo.giggle.repository;
 
+import com.inglo.giggle.domain.Announcement;
+import com.inglo.giggle.domain.Applicant;
 import com.inglo.giggle.domain.Apply;
 import com.inglo.giggle.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface ApplyRepository extends JpaRepository<Apply, Long> {
-    List<Apply> findByUser(User user);
+    List<Apply> findByApplicant(Applicant applicant);
+
+    List<Apply> findByAnnouncement(Announcement announcement);
 }

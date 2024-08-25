@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum PartTimeStep {
+public enum EPartTimeStep {
     ME_WRITE_LABOR_CONTRACT(1, "표준 근로계약서 작성"),
     EMPLOYER_WRITE_LABOR_CONTRACT(2, "고용주의 표준 근로계약서 작성"),
     ME_WRITE_PARTTIME_PERMIT(3, "시간제 취업허가서 작성"),
@@ -22,7 +22,7 @@ public enum PartTimeStep {
     private final String comment;
 
     public static String getCommentById(Integer id) {
-        for (PartTimeStep step : values()) {
+        for (EPartTimeStep step : values()) {
             if (step.getId().equals(id)) {
                 return step.getComment();
             }

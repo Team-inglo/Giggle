@@ -53,11 +53,6 @@ public enum ErrorCode {
     TOKEN_GENERATION_ERROR(40106, HttpStatus.UNAUTHORIZED, "토큰 생성에 실패하였습니다."),
     TOKEN_UNKNOWN_ERROR(40107, HttpStatus.UNAUTHORIZED, "알 수 없는 토큰입니다."),
 
-    // Apply Error
-    NOT_FOUND_APPLY(40700, HttpStatus.NOT_FOUND, "존재하지 않는 apply입니다."),
-    APPLY_DATABASE_ERROR(40701, HttpStatus.BAD_REQUEST, "Apply 데이터 저장에 실패했습니다."),
-    INVALID_PARTTIME_STEP(40702, HttpStatus.NOT_FOUND, "일치하는 part time comment가 없습니다."),
-
     // Document Error
     NOT_FOUND_DOCUMENT(40600, HttpStatus.NOT_FOUND, "존재하지 않는 document입니다."),
     INVALID_EVENT_TYPE(40601, HttpStatus.BAD_REQUEST, "잘못된 event type입니다."),
@@ -66,6 +61,11 @@ public enum ErrorCode {
 
     // Announcement
     NOT_FOUND_ANNOUNCEMENT(40600, HttpStatus.NOT_FOUND, "존재하지 않는 아르바이트입니다."),
+
+    // Apply Error
+    NOT_FOUND_APPLY(40700, HttpStatus.NOT_FOUND, "존재하지 않는 apply입니다."),
+    APPLY_DATABASE_ERROR(40701, HttpStatus.BAD_REQUEST, "Apply 데이터 저장에 실패했습니다."),
+    INVALID_PARTTIME_STEP(40702, HttpStatus.NOT_FOUND, "일치하는 part time comment가 없습니다."),
 
     // Internal Server Error
     INTERNAL_SERVER_ERROR(50000, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러입니다."),

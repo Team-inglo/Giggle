@@ -21,8 +21,8 @@ public class Apply {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "applicant_id", nullable = false)
+    private Applicant applicant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "announcement_id", nullable = false)
@@ -41,8 +41,8 @@ public class Apply {
     private List<Document> documents = new ArrayList<>();
 
     @Builder
-    public Apply(User user, Announcement announcement, Integer step, Boolean status, LocalDateTime createdAt){
-        this.user = user;
+    public Apply(Applicant applicant, Announcement announcement, Integer step, Boolean status, LocalDateTime createdAt){
+        this.applicant = applicant;
         this.announcement = announcement;
         this.step = step;
         this.status = status;
