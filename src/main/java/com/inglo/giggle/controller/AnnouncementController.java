@@ -32,7 +32,8 @@ public class AnnouncementController {
             @RequestParam(required = false) List<String> region,            // 근무 지역: 지역명, 여러 지역은 쉼표(,)로 구분
             @RequestParam(required = false) EAnnouncementPeriod period             // 기간: ALL(전체), OPEN(신청중), UPCOMING(신청예정), CLOSED(신청마감)
     ) {
-        return null;
+        AnnouncementListDto  announcementListDto = announcementService.getAnnouncementListForCategory(userId, sortBy, isOwner, jobType, sortOrder, region, period);
+        return announcementListDto;
     }
 
     @GetMapping("/{announcementId}")
