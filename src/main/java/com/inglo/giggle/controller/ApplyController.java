@@ -20,13 +20,4 @@ import java.util.List;
 public class ApplyController {
     private final ApplyService applyService;
 
-    @GetMapping("/logs")
-    @Operation(summary = "서류 상태 조회", description = "사용자가 작성한 서류의 상태 조회")
-    public UserApplyLogDto getUserApplyLogs(
-            @UserId Long userId,
-            @RequestParam Boolean status
-    ) {
-        UserApplyLogDto userApplyLogDto = applyService.getUserApplyLogs(userId, status);
-        return userApplyLogDto;
-    }
 }

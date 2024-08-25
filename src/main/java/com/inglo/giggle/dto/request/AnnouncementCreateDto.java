@@ -33,7 +33,7 @@ public record AnnouncementCreateDto(
         @JsonProperty("age") @Schema(description = "나이(제한)", required = true)
         Integer age,
 
-        @JsonProperty("gender") @Schema(description = "변경(제한)", required = true)
+        @JsonProperty("gender") @Schema(description = "성별(제한)", required = true)
         String gender,
 
         @JsonProperty("workStartTime") @Schema(description = "근무 시작시간", required = true)
@@ -42,11 +42,16 @@ public record AnnouncementCreateDto(
         @JsonProperty("workEndTime") @Schema(description = "근무 종료시간", required = true)
         LocalTime workEndTime,
 
-        @JsonProperty("education") @Schema(description = "교육", required = true)
+        @JsonProperty("education") @Schema(description = "학력", required = true)
         String education,
 
         @JsonProperty("location") @Schema(description = "근무 위치", required = true)
-        String location
+        String location,
+
+        @JsonProperty("numberRecruited") @Schema(description = "모집 인원", required = true) String numberRecruited,
+
+        @JsonProperty("content") @Schema(description = "상세 요강", required = true)
+        String content
 ) {
 
 }
