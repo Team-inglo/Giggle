@@ -1,5 +1,6 @@
 package com.inglo.giggle.domain;
 
+import com.inglo.giggle.dto.request.UpdateOwnerDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,8 +30,14 @@ public class Owner {
     @Column(name = "store_name")
     private String storeName;
 
-    @Column(name = "store_address")
-    private String storeAddress;
+    @Column(name = "store_address_name")
+    private String storeAddressName;
+
+    @Column(name = "store_address_x")
+    private Float storeAddressX;
+
+    @Column(name = "store_address_y")
+    private Float storeAddressY;
 
     @Column(name = "store_phone_number")
     private String storePhoneNumber;
@@ -47,5 +54,32 @@ public class Owner {
         return Owner.builder()
                 .user(user)
                 .build();
+    }
+
+    public void updateOwner(UpdateOwnerDto updateOwnerDto) {
+        if(updateOwnerDto.ownerRegistrationNumber() != null) {
+            this.ownerRegistrationNumber = updateOwnerDto.ownerRegistrationNumber();
+        }
+        if(updateOwnerDto.ownerName() != null) {
+            this.ownerName = updateOwnerDto.ownerName();
+        }
+        if(updateOwnerDto.storeName() != null) {
+            this.storeName = updateOwnerDto.storeName();
+        }
+        if(updateOwnerDto.storeAddressName() != null) {
+            this.storeAddressName = updateOwnerDto.storeAddressName();
+        }
+        if(updateOwnerDto.storeAddressX() != null) {
+            this.storeAddressX = updateOwnerDto.storeAddressX();
+        }
+        if(updateOwnerDto.storeAddressY() != null) {
+            this.storeAddressY = updateOwnerDto.storeAddressY();
+        }
+        if(updateOwnerDto.storePhoneNumber() != null) {
+            this.storePhoneNumber = updateOwnerDto.storePhoneNumber();
+        }
+        if(updateOwnerDto.storeEmail() != null) {
+            this.storeEmail = updateOwnerDto.storeEmail();
+        }
     }
 }
