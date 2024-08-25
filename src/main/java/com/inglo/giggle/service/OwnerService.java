@@ -6,6 +6,7 @@ import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
+import com.inglo.giggle.dto.type.EJobType;
 import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
@@ -43,7 +44,7 @@ public class OwnerService {
         Announcement announcement = Announcement.builder()
                 .owner(owner)
                 .title(request.title())
-                .jobType(request.jobType())
+                .jobType(EJobType.fromType(request.jobType()))
                 .hourlyRate(request.hourlyWage())
                 .workStartDate(request.workStartDate())
                 .deadLine(request.deadline())

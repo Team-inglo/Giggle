@@ -1,10 +1,7 @@
 package com.inglo.giggle.service;
 
 import com.inglo.giggle.annotation.UserId;
-import com.inglo.giggle.domain.Announcement;
-import com.inglo.giggle.domain.Owner;
-import com.inglo.giggle.domain.User;
-import com.inglo.giggle.domain.WorkDay;
+import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.request.RequestSignatureDto;
 import com.inglo.giggle.dto.request.WebClientRequestDto;
@@ -16,6 +13,7 @@ import com.inglo.giggle.dto.type.EDocumentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.AnnouncementRepository;
+import com.inglo.giggle.repository.ApplicantRepository;
 import com.inglo.giggle.repository.OwnerRepository;
 import com.inglo.giggle.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +34,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AnnouncementService {
     private final AnnouncementRepository announcementRepository;
+    private final ApplicantRepository applicantRepository;
     private final UserRepository userRepository;
     private final OwnerRepository ownerRepository;
 
     // 아르바이트 공고 생성
     public AnnouncementListDto getAnnouncementListForCategory(Long userId, String sortBy, Boolean isOwner, String jobType, String sortOrder, List<String> region, EAnnouncementPeriod period) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
         List<Announcement> announcements;
 
@@ -55,7 +55,7 @@ public class AnnouncementService {
         }
 
         if(sortBy != null && sortBy.equals("RECOMMENDATION")) { // 추천 알고리즘이라면
-            announcements = filterdSortByRecommendation(sortBy, announcements); // 추천 알고리즘 추가 필요
+            announcements = filterdSortByRecommendation(applicant, sortBy, announcements); // 추천 알고리즘 추가 필요
         } else {
             // 변화 없음.
         }
@@ -98,14 +98,22 @@ public class AnnouncementService {
     }
 
     // 유학생 - 추천 알고리즘 사용
-    public List<Announcement> filterdSortByRecommendation(String sortBy, List<Announcement> announcements) {
-        // 로직 추가 필요
+    public List<Announcement> filterdSortByRecommendation(Applicant applicant, String sortBy, List<Announcement> announcements) {
+        double maxDistance = 75.0; // 1시간 30분 이내 거리, 75km
+        announcements = announcementRepository.findByOwnerLocationWithin((double)applicant.getAddressX(), (double)applicant.getAddressY(), maxDistance);
+
         return announcements;
     }
 
     // 전체 - 지역으로 분류
     public List<Announcement> filterdRegion(List<String> region, List<Announcement> announcements) {
-        // 로직 추가 필요
+        // region 값이 1개라도 포함되어있는 경우
+        announcements.stream()
+                .filter(announcement ->
+                        region.stream().anyMatch(r -> announcement.getOwner().getStoreAddressName().contains(r))
+                )
+                .toList();
+
         return announcements;
     }
 
@@ -132,7 +140,7 @@ public class AnnouncementService {
     // 전체 - 업직종으로 분류
     public List<Announcement> filterdJobType(String jobType, List<Announcement> announcements) {
         announcements = announcements.stream()
-                .filter(announcement -> announcement.getJobType().equals(jobType))
+                .filter(announcement -> announcement.getJobType().getType().equals(jobType))
                 .toList();
 
         return announcements;
