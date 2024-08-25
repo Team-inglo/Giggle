@@ -20,7 +20,9 @@ public class Constants {
             "/api-docs/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
-            "/swagger-ui/**");
+            "/swagger-ui/**",
+            "/api/v1/users/documents/webhook"
+            );
 
     public static List<String> APPLICANTS_URLS = List.of(
             "/api/v1/applicants/**");
