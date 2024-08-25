@@ -2,6 +2,7 @@ package com.inglo.giggle.service;
 
 import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
+import com.inglo.giggle.dto.request.UpdateOwnerDto;
 import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -189,5 +191,11 @@ public class OwnerService {
                 .block();
 
         return responseDto.embeddedUrl();
+    }
+
+    @Transactional
+    public void updateOwner(Long userId, UpdateOwnerDto updateOwnerDto) {
+        Owner owner = ownerRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
+        owner.updateOwner(updateOwnerDto);
     }
 }
