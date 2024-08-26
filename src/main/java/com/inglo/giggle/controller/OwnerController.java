@@ -6,14 +6,15 @@ import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.request.UpdateOwnerDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
-import com.inglo.giggle.dto.response.UserApplyLogDto;
 import com.inglo.giggle.service.OwnerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "점주", description = "점주 관련 API")
 @RequestMapping("/api/v1/owners")
 public class OwnerController {
     private final OwnerService ownerService;
