@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Auth", description = "인증 관련 API")
+@Tag(name = "회원가입/로그인", description = "인증 관련 API")
 @RequestMapping("/api/v1")
 public class AuthController {
     private final AuthService authService;

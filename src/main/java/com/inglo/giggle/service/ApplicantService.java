@@ -3,7 +3,9 @@ package com.inglo.giggle.service;
 import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.domain.Applicant;
 import com.inglo.giggle.domain.ApplicantFile;
-import com.inglo.giggle.dto.request.UpdateApplicantDto;
+import com.inglo.giggle.dto.request.*;
+import com.inglo.giggle.dto.response.PassportDto;
+import com.inglo.giggle.dto.response.RegistrationDto;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.ApplicantFileRepository;
@@ -40,8 +42,7 @@ public class ApplicantService {
         applicant.updateApplicant(updateApplicantDto);
     }
 
-    @Transactional
-    public void updatePassport(@UserId Long userId, MultipartFile file) {
+    public PassportDto extractFromPassport(@UserId Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         ApplicantFile applicantFile = applicantFileRepository.findByApplicant(applicant)
@@ -111,12 +112,15 @@ public class ApplicantService {
                 imageUtil.deleteImageFile(currentPassportFileUrl);
                 throw new CommonException(ErrorCode.INVALID_PASSPORT_FILE, "Missing Fields: " + missingFields.toString());
             }
-            else {
-                applicant.registerPassport(passportNumber, name.toString(), sex, dob, nationality, passportIssueDate, passportExpiryDate);
-                if(isPassportFileExist) {
-                    imageUtil.deleteImageFile(pastPassportFileUrl);
-                }
-            }
+            return PassportDto.builder()
+                    .passportNumber(passportNumber)
+                    .name(name)
+                    .sex(sex)
+                    .dateOfBirth(dob)
+                    .nationality(nationality)
+                    .passportIssueDate(passportIssueDate)
+                    .passportExpiryDate(passportExpiryDate)
+                    .build();
         } catch (Exception e) {
             log.error("Passport file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -124,7 +128,17 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void updateRegistration(@UserId Long userId, MultipartFile file) {
+    public void updatePassport(@UserId Long userId, PassportUpdateDto passportUpdateDto) {
+        try {
+            Applicant applicant = applicantRepository.findById(userId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+            applicant.registerPassport(passportUpdateDto);
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public RegistrationDto extractFromRegistration(@UserId Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         ApplicantFile applicantFile = applicantFileRepository.findByApplicant(applicant)
@@ -175,7 +189,6 @@ public class ApplicantService {
                 }
             }
 
-
             if (registrationNumber == null || statusOfResidence == null || registrationIssueDate == null) {
                 StringBuilder missingFields = new StringBuilder();
                 if (registrationNumber == null) missingFields.append("registrationNumber ");
@@ -184,13 +197,12 @@ public class ApplicantService {
                 throw new CommonException(ErrorCode.INVALID_REGISTRATION_FILE, "Missing Fields: " + missingFields.toString());
             } else if (!(statusOfResidence.contains("D-2")) && !(statusOfResidence.contains("D-4"))) {
                 throw new CommonException(ErrorCode.INVALID_REGISTRATION_FILE, "체류자격이 D-2 혹은 D-4인 경우에만 가입이 가능합니다.");
-            } else {
-                applicant.registerRegistration(registrationNumber, statusOfResidence, registrationIssueDate);
-                if(isRegistrationExist) {
-                    imageUtil.deleteImageFile(pastRegistrationFileUrl);
-                }
             }
-
+            return RegistrationDto.builder()
+                    .registrationNumber(registrationNumber)
+                    .statusOfResidence(statusOfResidence)
+                    .registrationIssueDate(registrationIssueDate)
+                    .build();
         } catch (Exception e) {
             log.error("Registration file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -198,7 +210,17 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void updateTopik(Long userId, MultipartFile file) {
+    public void updateRegistration(@UserId Long userId, RegistrationUpdateDto registrationUpdateDto) {
+        try {
+            Applicant applicant = applicantRepository.findById(userId)
+                    .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+            applicant.registerRegistration(registrationUpdateDto);
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public String extractFromTopik(Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
@@ -225,16 +247,21 @@ public class ApplicantService {
             }
             if (topikScore == null) {
                 throw new CommonException(ErrorCode.INVALID_TOPIK_FILE, "Missing Fields: " + "topikScore");
-            } else {
-                applicant.registerTopik(topikScore);
             }
+            return topikScore;
         } catch (Exception e) {
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Transactional
-    public void updateSocialIntegrationProgram(Long userId, MultipartFile file) {
+    public void updateTopik(Long userId, TopikUpdateDto topikUpdateDto) {
+        Applicant applicant = applicantRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        applicant.registerTopik(topikUpdateDto);
+    }
+
+    public String extractFromSocialIntegrationProgram(Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
@@ -261,9 +288,8 @@ public class ApplicantService {
             }
             if (socialIntegrationProgramScore == null) {
                 throw new CommonException(ErrorCode.INVALID_SOCIAL_INTEGRATION_PROGRAM_FILE, "Missing Fields: socialIntegrationProgramScore" );
-            } else {
-                applicant.registerSocialIntegrationProgram(socialIntegrationProgramScore);
             }
+            return socialIntegrationProgramScore;
         } catch (Exception e) {
             log.error("Social Integration Program file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -271,7 +297,13 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void updateSejongInstitute(Long userId, MultipartFile file) {
+    public void updateSocialIntegrationProgram(Long userId, SocialIntegrationProgramUpdateDto socialIntegrationProgramUpdateDto) {
+        Applicant applicant = applicantRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        applicant.registerSocialIntegrationProgram(socialIntegrationProgramUpdateDto);
+    }
+
+    public String extractFromSejongInstitute(Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
         try {
@@ -306,11 +338,18 @@ public class ApplicantService {
                 else if(Integer.parseInt(sejongInstituteScore)<496) sejongInstituteScore = "4";
                 else if(Integer.parseInt(sejongInstituteScore)<581) sejongInstituteScore = "5";
                 else sejongInstituteScore = "6";
-                applicant.registerSejongInstitute(sejongInstituteScore);
             }
+            return sejongInstituteScore;
         } catch (Exception e) {
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Transactional
+    public void updateSejongInstitute(Long userId, SejongInstituteUpdateDto sejongInstituteUpdateDto) {
+        Applicant applicant = applicantRepository.findById(userId)
+                .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        applicant.registerSejongInstitute(sejongInstituteUpdateDto);
     }
 
     private String callGoogleVisionApi(String base64Image) {

@@ -1,7 +1,9 @@
 package com.inglo.giggle.domain;
 
 import com.inglo.giggle.annotation.Date;
-import com.inglo.giggle.dto.request.UpdateApplicantDto;
+import com.inglo.giggle.dto.request.*;
+import com.inglo.giggle.dto.response.PassportDto;
+import com.inglo.giggle.dto.response.RegistrationDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -109,29 +111,29 @@ public class Applicant {
             this.endDay = updateApplicantDto.endDay();
     }
 
-    public void registerPassport(String passportNumber, String name, String sex, String dateOfBirth, String nationality, String passportIssueDate, String passportExpiryDate) {
-        this.passportNumber = passportNumber;
-        this.name = name;
-        this.sex = sex;
-        this.dateOfBirth = dateOfBirth;
-        this.nationality = nationality;
-        this.passportIssueDate = passportIssueDate;
-        this.passportExpiryDate = passportExpiryDate;
+    public void registerPassport(PassportUpdateDto passportDto) {
+        this.passportNumber = passportDto.passportNumber();
+        this.name = passportDto.name();
+        this.sex = passportDto.sex();
+        this.dateOfBirth = passportDto.dateOfBirth();
+        this.nationality = passportDto.nationality();
+        this.passportIssueDate = passportDto.passportIssueDate();
+        this.passportExpiryDate = passportDto.passportExpiryDate();
     }
 
-    public void registerRegistration(String registrationNumber, String statusOfResidence, String registrationIssueDate) {
-        this.registrationNumber = registrationNumber;
-        this.statusOfResidence = statusOfResidence;
-        this.registrationIssueDate = registrationIssueDate;
+    public void registerRegistration(RegistrationUpdateDto registrationDto) {
+        this.registrationNumber = registrationDto.registrationNumber();
+        this.statusOfResidence = registrationDto.statusOfResidence();
+        this.registrationIssueDate = registrationDto.registrationIssueDate();
     }
 
-    public void registerTopik(String topikScore){
-        this.topikScore = topikScore;
+    public void registerTopik(TopikUpdateDto topikUpdateDto){
+        this.topikScore = topikUpdateDto.topikScore();
     }
-    public void registerSocialIntegrationProgram(String socialIntegrationProgramScore){
-        this.socialIntegrationProgramScore = socialIntegrationProgramScore;
+    public void registerSocialIntegrationProgram(SocialIntegrationProgramUpdateDto socialIntegrationProgramUpdateDto){
+        this.socialIntegrationProgramScore = socialIntegrationProgramUpdateDto.socialIntegrationProgramScore();
     }
-    public void registerSejongInstitute(String sejongInstituteScore){
-        this.sejongInstituteScore = sejongInstituteScore;
+    public void registerSejongInstitute(SejongInstituteUpdateDto sejongInstituteUpdateDto){
+        this.sejongInstituteScore = sejongInstituteUpdateDto.sejongInstituteScore();
     }
 }
