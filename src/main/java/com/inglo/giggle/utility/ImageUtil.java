@@ -24,9 +24,6 @@ public class ImageUtil {
     @Value("${spring.image.path}")
     private String resourcePath;
 
-    @Value("${server.https-address}")
-    private String serverUrl;
-
     @Autowired
     private AmazonS3Client amazonS3Client;
     @Value("${cloud.aws.s3.bucket}")
