@@ -38,20 +38,40 @@ public class DocumentService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
     // 시간제 취업허가서 신청
+    @Transactional
     public String requestSinature(List<RequestSignatureDto> request, String documentType, Long announcementId, Long userId) {
         // documentType 가져오기
         EDocumentType type = EDocumentType.valueOf(documentType);
 
+        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        // 외국인유학생, 고용주의 이름
+        String ownerName = announcement.getOwner().getOwnerName();
+        String applicantName = applicant.getName();
+
         List<WebClientRequestDto.ParticipantMapping> participantMappings = request.stream()
-                .map(req -> new WebClientRequestDto.ParticipantMapping(
-                        false,
-                        new WebClientRequestDto.SigningMethod(req.signingMethod().type(), req.signingMethod().value()),
-                        20160,
-                        "ko",
-                        req.role(),
-                        req.name(),
-                        type.getMessage()
-                ))
+                .map(req -> {
+                    String name;
+                    if ("고용주".equals(req.role())) {
+                        name = ownerName;
+                    } else if ("외국인유학생".equals(req.role())) {
+                        name = applicantName;
+                    } else {
+                        name = req.name(); // 기본 값
+                    }
+
+                    return new WebClientRequestDto.ParticipantMapping(
+                            false,
+                            new WebClientRequestDto.SigningMethod(req.signingMethod().type(), req.signingMethod().value()),
+                            20160,
+                            "ko",
+                            req.role(),
+                            name,  // name을 위에서 설정한 값으로 대체
+                            type.getMessage()
+                    );
+                })
                 .toList();
 
         WebClientRequestDto.Document document = new WebClientRequestDto.Document(
@@ -86,10 +106,10 @@ public class DocumentService {
 
         if (documentType.equals("EMPLOYMENT_CONTRACT")) {
             // EMPLOYMENT_CONTRACT인 경우, 새로운 apply 객체 생성
-            addApply(responseDto, announcementId, type, userId);
+            addApply(responseDto, announcementId, type, userId, applicant, announcement);
         } else {
             // TIME_WORK_PERMIT 또는 INTEGRATED_APPLICATION인 경우, 기존 apply 객체 찾아서 업데이트
-            updateOrAddToExistingApply(responseDto, announcementId, type, userId);
+            updateOrAddToExistingApply(responseDto, announcementId, type, userId, applicant, announcement);
         }
 
 
@@ -118,11 +138,7 @@ public class DocumentService {
         return responseDto.embeddedUrl();
     }
 
-    private void addApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
-        Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
-
+    private void addApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId, Applicant applicant, Announcement announcement) {
 
         Apply apply = Apply.builder()
                 .applicant(applicant)
@@ -143,14 +159,12 @@ public class DocumentService {
     }
 
     // 기존 apply에 documents 객체 추가(시간제취업허가서, 통합신청서의 경우)
-    private void updateOrAddToExistingApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
-        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+    private void updateOrAddToExistingApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId, Applicant applicant, Announcement announcement) {
         Apply apply = applyRepository.findByAnnouncementIdAndApplicantId(announcementId, applicant.getId()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLY));
 
         if (apply == null) {
             // Apply 객체가 존재하지 않으면 새로운 Apply 생성
-            addApply(request, announcementId, documentType, userId);
+            addApply(request, announcementId, documentType, userId, applicant, announcement);
         } else {
             // 기존 Apply 객체에 문서 추가
             try {
