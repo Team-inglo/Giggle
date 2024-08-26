@@ -21,4 +21,12 @@ public enum EventType {
 
     private final String type;
 
+    public static EventType fromType(String type) {
+        for (EventType eventType : EventType.values()) {
+            if (eventType.getType().equals(type)) {
+                return eventType;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with type: " + type);
+    }
 }

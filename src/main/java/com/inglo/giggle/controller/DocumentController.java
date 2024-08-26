@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "지원 서류", description = "사용자의 아르바이트 지원 서류 관련 API")
-@RequestMapping("/api/v1/users/documents")
+@RequestMapping("/api/v1/applicants/documents")
 public class DocumentController {
     private final DocumentService documentService;
 
@@ -26,7 +26,7 @@ public class DocumentController {
             @RequestParam Long announcementId,
             @UserId Long userId
     ) {
-        String embeddedUrl = documentService.requestSinature(request, documentType, announcementId, userId);
+        String embeddedUrl = documentService.requestSignature(request, documentType, announcementId, userId);
 
         return embeddedUrl;
     }

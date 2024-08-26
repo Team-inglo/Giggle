@@ -3,11 +3,9 @@ package com.inglo.giggle.service;
 import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.request.UpdateOwnerDto;
-import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
-import com.inglo.giggle.dto.type.EJobType;
 import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
@@ -46,7 +44,7 @@ public class OwnerService {
         Announcement announcement = Announcement.builder()
                 .owner(owner)
                 .title(request.title())
-                .jobType(request.jobType())
+                .jobType(request.jobType().name())
                 .hourlyRate(request.hourlyWage())
                 .workStartDate(request.workStartDate())
                 .deadLine(request.deadline())
@@ -98,8 +96,8 @@ public class OwnerService {
                             announcement.getId(),
                             announcement.getTitle(),
                             announcement.getOwner().getStoreAddressName(),
-                            totalApplies,
                             (int) falseStatusApplies,
+                            totalApplies,
                             announcement.getDeadLine(),
                             (int) ChronoUnit.DAYS.between(LocalDate.now(), announcement.getDeadLine()) // 날짜 차이를 일수로 계산
                     );
@@ -131,7 +129,14 @@ public class OwnerService {
     @Transactional
     public OwnerAnnouncementStatusDetailDto getOwnerAnnouncementStatusDetails(Long userId, Long announcementId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
+
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        // Announcement가 해당 Owner의 것인지 확인
+        if (!announcement.getOwner().equals(owner)) {
+            throw new CommonException(ErrorCode.NOT_OWNERS_ANNOUNCEMENT);
+        }
 
         List<Apply> applies = applyRepository.findByAnnouncement(announcement);
 
@@ -147,15 +152,19 @@ public class OwnerService {
         List<OwnerAnnouncementStatusDetailDto.applicantsStatus> applicantsStatuses = applies.stream()
                 .map(apply -> {
                     String embeddedUrl = "";
-                    if(apply.getDocuments().get(2).getDocumentId() != null) {
-                        embeddedUrl = getViewEmbeddedUrl(apply.getDocuments().get(2).getDocumentId());
+                    List<Document> documents = apply.getDocuments();
+
+                    // 리스트 크기가 3 이상인지 확인
+                    if(!documents.isEmpty() && documents.get(0).getDocumentId() != null) {
+                        embeddedUrl = getViewEmbeddedUrl(documents.get(0).getDocumentId());
                     }
+
                     return new OwnerAnnouncementStatusDetailDto.applicantsStatus(
                             apply.getId(),
                             apply.getApplicant().getName(),
                             apply.getCreatedAt().toLocalDate(),
                             ERequestStepCommentType.getCommentById(apply.getStep()),
-                            embeddedUrl // 근로계약서 url. 없는 경우에는 null
+                            embeddedUrl // 근로계약서 url. 없는 경우에는 빈 값
                     );
                 })
                 .toList();
