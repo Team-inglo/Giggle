@@ -26,7 +26,7 @@ public class DocumentController {
             @RequestParam Long announcementId,
             @UserId Long userId
     ) {
-        String embeddedUrl = documentService.requestSinature(request, documentType, announcementId, userId);
+        String embeddedUrl = documentService.requestSignature(request, documentType, announcementId, userId);
 
         return embeddedUrl;
     }

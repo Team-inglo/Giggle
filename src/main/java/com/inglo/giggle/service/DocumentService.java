@@ -39,7 +39,7 @@ public class DocumentService {
 
     // 시간제 취업허가서 신청
     @Transactional
-    public String requestSinature(List<RequestSignatureDto> request, String documentType, Long announcementId, Long userId) {
+    public String requestSignature(List<RequestSignatureDto> request, String documentType, Long announcementId, Long userId) {
         // documentType 가져오기
         EDocumentType type = EDocumentType.valueOf(documentType);
 
