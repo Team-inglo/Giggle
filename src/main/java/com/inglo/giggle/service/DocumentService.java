@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -83,7 +84,14 @@ public class DocumentService {
 
         String embeddedUrl = getembeddedUrl(responseDto.id(), responseDto.participants().get(0).id());
 
-        addApply(responseDto, announcementId, type, userId);
+        if (documentType.equals("EMPLOYMENT_CONTRACT")) {
+            // EMPLOYMENT_CONTRACT인 경우, 새로운 apply 객체 생성
+            addApply(responseDto, announcementId, type, userId);
+        } else {
+            // TIME_WORK_PERMIT 또는 INTEGRATED_APPLICATION인 경우, 기존 apply 객체 찾아서 업데이트
+            updateOrAddToExistingApply(responseDto, announcementId, type, userId);
+        }
+
 
         return embeddedUrl;
     }
@@ -134,6 +142,26 @@ public class DocumentService {
         }
     }
 
+    // 기존 apply에 documents 객체 추가(시간제취업허가서, 통합신청서의 경우)
+    private void updateOrAddToExistingApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Applicant applicant = applicantRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        Apply apply = applyRepository.findByAnnouncementIdAndApplicantId(announcementId, applicant.getId()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLY));
+
+        if (apply == null) {
+            // Apply 객체가 존재하지 않으면 새로운 Apply 생성
+            addApply(request, announcementId, documentType, userId);
+        } else {
+            // 기존 Apply 객체에 문서 추가
+            try {
+                addDocumentForApply(apply, documentType, request.id());
+                applyRepository.save(apply);
+            } catch (DataAccessException e) {
+                throw new CommonException(ErrorCode.APPLY_DATABASE_ERROR);
+            }
+        }
+    }
+
     // apply의 document 추가 method
     private void addDocumentForApply(Apply apply, EDocumentType documentType, String documentId) {
         Document document = Document.builder()
@@ -150,10 +178,11 @@ public class DocumentService {
     }
 
     // 모두싸인에서 보내는 post용 api
+    @Transactional
     public void requestWebHook(WebHookRequestDto request) {
         // request에서 document id로 요청 파악
         Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
-        EventType eventType = EventType.valueOf(request.event().type()); // eventype get
+        EventType eventType = EventType.fromType(request.event().type()); // eventype get
         handleEvent(eventType, document);
     }
 

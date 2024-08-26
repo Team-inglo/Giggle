@@ -96,8 +96,8 @@ public class OwnerService {
                             announcement.getId(),
                             announcement.getTitle(),
                             announcement.getOwner().getStoreAddressName(),
-                            totalApplies,
                             (int) falseStatusApplies,
+                            totalApplies,
                             announcement.getDeadLine(),
                             (int) ChronoUnit.DAYS.between(LocalDate.now(), announcement.getDeadLine()) // 날짜 차이를 일수로 계산
                     );
@@ -152,15 +152,19 @@ public class OwnerService {
         List<OwnerAnnouncementStatusDetailDto.applicantsStatus> applicantsStatuses = applies.stream()
                 .map(apply -> {
                     String embeddedUrl = "";
-                    if(apply.getDocuments().get(2).getDocumentId() != null) {
-                        embeddedUrl = getViewEmbeddedUrl(apply.getDocuments().get(2).getDocumentId());
+                    List<Document> documents = apply.getDocuments();
+
+                    // 리스트 크기가 3 이상인지 확인
+                    if(!documents.isEmpty() && documents.get(0).getDocumentId() != null) {
+                        embeddedUrl = getViewEmbeddedUrl(documents.get(0).getDocumentId());
                     }
+
                     return new OwnerAnnouncementStatusDetailDto.applicantsStatus(
                             apply.getId(),
                             apply.getApplicant().getName(),
                             apply.getCreatedAt().toLocalDate(),
                             ERequestStepCommentType.getCommentById(apply.getStep()),
-                            embeddedUrl // 근로계약서 url. 없는 경우에는 null
+                            embeddedUrl // 근로계약서 url. 없는 경우에는 빈 값
                     );
                 })
                 .toList();
