@@ -53,7 +53,7 @@ public class AnnouncementService {
             // 변화 없음.
         }
 
-        if(jobType != null) { // jobType이 있다면
+        if(jobType != null && !jobType.equals("ANY")) { // jobType이 있다면
             announcements = filterdJobType(jobType, announcements);
         } else {
             // 변화 없음.
