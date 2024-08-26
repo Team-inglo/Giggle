@@ -129,7 +129,14 @@ public class OwnerService {
     @Transactional
     public OwnerAnnouncementStatusDetailDto getOwnerAnnouncementStatusDetails(Long userId, Long announcementId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_USER));
+        Owner owner = ownerRepository.findByUser(user).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_OWNER));
+
         Announcement announcement = announcementRepository.findById(announcementId).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_ANNOUNCEMENT));
+
+        // Announcement가 해당 Owner의 것인지 확인
+        if (!announcement.getOwner().equals(owner)) {
+            throw new CommonException(ErrorCode.NOT_OWNERS_ANNOUNCEMENT);
+        }
 
         List<Apply> applies = applyRepository.findByAnnouncement(announcement);
 

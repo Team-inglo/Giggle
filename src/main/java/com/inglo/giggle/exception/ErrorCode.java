@@ -61,6 +61,7 @@ public enum ErrorCode {
 
     // Announcement
     NOT_FOUND_ANNOUNCEMENT(40600, HttpStatus.NOT_FOUND, "존재하지 않는 아르바이트입니다."),
+    NOT_OWNERS_ANNOUNCEMENT(40601, HttpStatus.NOT_FOUND, "해당 고용주의 아르바이트 공고가 아닙니다."),
 
     // Apply Error
     NOT_FOUND_APPLY(40700, HttpStatus.NOT_FOUND, "존재하지 않는 apply입니다."),
