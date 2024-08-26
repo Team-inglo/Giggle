@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "아르바이트 지원", description = "사용자의 아르바이트 지원 관련 API")
-@RequestMapping("/api/v1/applys")
+@RequestMapping("/api/v1/applicants/applys")
 public class ApplyController {
     private final ApplyService applyService;
 
