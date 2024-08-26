@@ -3,11 +3,9 @@ package com.inglo.giggle.service;
 import com.inglo.giggle.domain.*;
 import com.inglo.giggle.dto.request.AnnouncementCreateDto;
 import com.inglo.giggle.dto.request.UpdateOwnerDto;
-import com.inglo.giggle.dto.response.AnnouncementListDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusDetailDto;
 import com.inglo.giggle.dto.response.OwnerAnnouncementStatusListDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
-import com.inglo.giggle.dto.type.EJobType;
 import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
@@ -46,7 +44,7 @@ public class OwnerService {
         Announcement announcement = Announcement.builder()
                 .owner(owner)
                 .title(request.title())
-                .jobType(request.jobType())
+                .jobType(request.jobType().name())
                 .hourlyRate(request.hourlyWage())
                 .workStartDate(request.workStartDate())
                 .deadLine(request.deadline())

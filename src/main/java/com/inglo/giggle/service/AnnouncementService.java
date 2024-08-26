@@ -1,17 +1,9 @@
 package com.inglo.giggle.service;
 
-import com.inglo.giggle.annotation.UserId;
 import com.inglo.giggle.domain.*;
-import com.inglo.giggle.dto.request.AnnouncementCreateDto;
-import com.inglo.giggle.dto.request.RequestSignatureDto;
-import com.inglo.giggle.dto.request.WebClientRequestDto;
 import com.inglo.giggle.dto.response.AnnouncementDetailDto;
 import com.inglo.giggle.dto.response.AnnouncementListDto;
-import com.inglo.giggle.dto.response.WebClientResponseDto;
-import com.inglo.giggle.dto.type.EAnnouncementPeriod;
-import com.inglo.giggle.dto.type.EDocumentType;
-import com.inglo.giggle.dto.type.EEducation;
-import com.inglo.giggle.dto.type.EGender;
+import com.inglo.giggle.dto.type.*;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.AnnouncementRepository;
@@ -21,10 +13,7 @@ import com.inglo.giggle.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
-import reactor.core.publisher.Mono;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -112,13 +101,11 @@ public class AnnouncementService {
     // 전체 - 지역으로 분류
     public List<Announcement> filterdRegion(List<String> region, List<Announcement> announcements) {
         // region 값이 1개라도 포함되어있는 경우
-        announcements.stream()
+        return announcements.stream()
                 .filter(announcement ->
                         region.stream().anyMatch(r -> announcement.getOwner().getStoreAddressName().contains(r))
                 )
                 .toList();
-
-        return announcements;
     }
 
     // 전체 - 공고 모집 상태로 분류
@@ -144,7 +131,7 @@ public class AnnouncementService {
     // 전체 - 업직종으로 분류
     public List<Announcement> filterdJobType(String jobType, List<Announcement> announcements) {
         announcements = announcements.stream()
-                .filter(announcement -> announcement.getJobType().getType().equals(jobType))
+                .filter(announcement -> announcement.getJobType().equals(jobType))
                 .toList();
 
         return announcements;
