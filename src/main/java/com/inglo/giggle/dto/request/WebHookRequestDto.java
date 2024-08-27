@@ -19,7 +19,7 @@ public record WebHookRequestDto(
     public record Document(
             @JsonProperty("id") @Schema(description = "문서ID", required = true)
             String id,
-            @JsonProperty("request") @Schema(description = "요청자", required = true)
+            @JsonProperty("requester") @Schema(description = "요청자", required = true)
             Requester requester
     ) {
         public record Requester(

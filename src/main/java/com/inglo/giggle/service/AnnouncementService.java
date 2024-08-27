@@ -120,11 +120,10 @@ public class AnnouncementService {
 
     // 조건에 따른 근로 가능 시간 조회
     private int calculateWorkingHours(Applicant applicant) {
-        int semester = 0; // 실제 이수학기를 추가해야 함
         int workingHours = 0;
 
         // 1 ~ 2학년 기본 근로시간 설정
-        if (semester <= 4) { // 1~2학년 조건
+        if (applicant.getSemester() <= 4) { // 1~2학년 조건
             if (Integer.parseInt(applicant.getTopikScore()) > 2
                     && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 2
                     && Integer.parseInt(applicant.getSejongInstituteScore()) > 2) { // 세종학당 중급1 점수
@@ -139,7 +138,7 @@ public class AnnouncementService {
         }
 
         // 3~4학년 조건
-        if (semester > 4 && semester <= 8) { // 3~4학년
+        if (applicant.getSemester() > 4 && applicant.getSemester() <= 8) { // 3~4학년
             if (Integer.parseInt(applicant.getTopikScore()) > 3
                     && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 3
                     && Integer.parseInt(applicant.getSejongInstituteScore()) > 3) { // 세종학당 중급2 점수
@@ -154,7 +153,7 @@ public class AnnouncementService {
         }
 
         // 석사 이상 조건
-        if (semester > 8) { // 석사 이상
+        if (applicant.getSemester() > 8) { // 석사 이상
             if (Integer.parseInt(applicant.getTopikScore()) > 3
                     && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 3
                     && Integer.parseInt(applicant.getSejongInstituteScore()) > 3) { // 세종학당 중급2
@@ -175,7 +174,6 @@ public class AnnouncementService {
     public long calculateTotalWorkHours(Announcement announcement) {
         List<WorkDay> workDays = announcement.getWorkDays();
         long totalMinutes = 0;
-        System.out.println("Total Hours Calculated: " + totalMinutes);
 
         for (WorkDay workDay : workDays) {
             // 요일 가져오기
@@ -194,7 +192,6 @@ public class AnnouncementService {
 
         // 총 분을 시간으로 변환
         long totalHours = totalMinutes / 60;
-        System.out.println("Total Hours Calculated: " + totalHours);
         return totalHours;
     }
 

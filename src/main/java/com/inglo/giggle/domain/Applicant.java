@@ -44,6 +44,9 @@ public class Applicant {
     @Column(name = "endDay")
     private LocalDateTime endDay= null;
 
+    @Column(name = "semester")
+    private Integer semester;
+
     /* User Info - passport */
     @Column(name = "passport_number")
     private String passportNumber;
@@ -109,6 +112,8 @@ public class Applicant {
             this.startDay = updateApplicantDto.startDay();
         if (updateApplicantDto.endDay() != null && (!this.endDay.equals(updateApplicantDto.endDay())))
             this.endDay = updateApplicantDto.endDay();
+        if (updateApplicantDto.semester() != null && (!this.semester.equals(updateApplicantDto.semester())))
+            this.semester = updateApplicantDto.semester();
     }
 
     public void registerPassport(PassportUpdateDto passportDto) {

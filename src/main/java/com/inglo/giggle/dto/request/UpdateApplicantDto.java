@@ -19,6 +19,8 @@ public record UpdateApplicantDto(
         LocalDateTime startDay,
         @JsonProperty("endDay")
         @Date
-        LocalDateTime endDay
+        LocalDateTime endDay,
+        @JsonProperty("semester")
+        Integer semester
 ) {
 }
