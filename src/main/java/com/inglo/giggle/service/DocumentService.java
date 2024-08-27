@@ -16,12 +16,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.inglo.giggle.dto.type.EDocumentType.TIME_WORK_PERMIT;
@@ -79,13 +81,64 @@ public class DocumentService {
 
         WebClientRequestDto.Document document = new WebClientRequestDto.Document(
                 participantMappings,
+                null,
                 type.getTitle()
         );
+
+        // 시간제 취업허가서의 경우 넣어야하는 요청자 데이터 필드
+        if (type.equals(EDocumentType.TIME_WORK_PERMIT)) {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "applicantName", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "applicantRegistrationNumber", applicant.getRegistrationNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreName", announcement.getOwner().getStoreName());
+            addRequesterInputMapping(requesterInputMappings, "ownerRegistrationNumber", announcement.getOwner().getOwnerRegistrationNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreAddressName", announcement.getOwner().getStoreAddressName());  // 값 없이 추가
+            addRequesterInputMapping(requesterInputMappings, "ownerName", ownerName);
+            addRequesterInputMapping(requesterInputMappings, "ownerStorePhoneNumber", announcement.getOwner().getStorePhoneNumber());
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+
+        }   else if(type.equals(EDocumentType.EMPLOYMENT_CONTRACT)) {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreName", announcement.getOwner().getStoreName());
+            addRequesterInputMapping(requesterInputMappings, "ownerStorePhoneNumber", announcement.getOwner().getStorePhoneNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreAddressName", announcement.getOwner().getStoreAddressName());
+            addRequesterInputMapping(requesterInputMappings, "ownerName", ownerName);
+            addRequesterInputMapping(requesterInputMappings, "ownerRegistrationNumber", announcement.getOwner().getOwnerRegistrationNumber());  // 값 없이 추가
+            addRequesterInputMapping(requesterInputMappings, "applicantName", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "applicantDateOfBirth", applicant.getDateOfBirth());
+            addRequesterInputMapping(requesterInputMappings, "applicantName2", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "ownerName2", ownerName);
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+        } else {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "selectApplication", "V");
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+        }
 
         WebClientRequestDto requestDto = new WebClientRequestDto(
                 document,
                 type.getTemplateId() // template id
         );
+
+        System.out.println(requestDto);
 
         WebClientResponseDto responseDto = webClient.post()
                 .uri("/documents/request-with-template")
@@ -119,6 +172,12 @@ public class DocumentService {
         return embeddedUrl;
     }
 
+    private void addRequesterInputMapping(List<WebClientRequestDto.RequesterInputMapping> mappings, String dataLabel, String value) {
+        if (value != null && !value.isEmpty()) {
+            mappings.add(new WebClientRequestDto.RequesterInputMapping(dataLabel, value));
+        }
+    }
+
     private String getembeddedUrl(String documentId, String participantId) {
         String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, "https://github.com/bianbbc87"); // redirect url 추가
 
@@ -140,6 +199,8 @@ public class DocumentService {
 
         return responseDto.embeddedUrl();
     }
+
+
 
     private void addApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId, Applicant applicant, Announcement announcement) {
 

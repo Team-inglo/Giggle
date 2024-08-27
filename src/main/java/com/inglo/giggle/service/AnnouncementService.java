@@ -92,8 +92,15 @@ public class AnnouncementService {
 
     // 유학생 - 추천 알고리즘 사용
     public List<Announcement> filterdSortByRecommendation(Applicant applicant, String sortBy, List<Announcement> announcements) {
+        // 거리 계산
         double maxDistance = 75.0; // 1시간 30분 이내 거리, 75km
         announcements = announcementRepository.findByOwnerLocationWithin((double)applicant.getAddressX(), (double)applicant.getAddressY(), maxDistance);
+
+        // 근로 시간 계산
+
+
+        // 업직종 계산
+
 
         return announcements;
     }
