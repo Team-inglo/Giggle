@@ -13,6 +13,7 @@ import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import static com.inglo.giggle.dto.type.EDocumentType.TIME_WORK_PERMIT;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
@@ -95,6 +97,7 @@ public class DocumentService {
             addRequesterInputMapping(requesterInputMappings, "ownerStoreAddressName", announcement.getOwner().getStoreAddressName());  // 값 없이 추가
             addRequesterInputMapping(requesterInputMappings, "ownerName", ownerName);
             addRequesterInputMapping(requesterInputMappings, "ownerStorePhoneNumber", announcement.getOwner().getStorePhoneNumber());
+            addRequesterInputMapping(requesterInputMappings, "applicantSemester", applicant.getSemester().toString());
 
             // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
             document = new WebClientRequestDto.Document(
@@ -138,8 +141,6 @@ public class DocumentService {
                 type.getTemplateId() // template id
         );
 
-        System.out.println(requestDto);
-
         WebClientResponseDto responseDto = webClient.post()
                 .uri("/documents/request-with-template")
                 .header("accept", "application/json")
@@ -179,7 +180,7 @@ public class DocumentService {
     }
 
     private String getembeddedUrl(String documentId, String participantId) {
-        String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, "https://github.com/bianbbc87"); // redirect url 추가
+        String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, "https://giggle-inglo.com/document"); // redirect url 추가
 
         WebClientEmbeddedResponseDto responseDto = webClient.get()
                 .uri(url)
@@ -264,11 +265,13 @@ public class DocumentService {
     // 모두싸인에서 보내는 post용 api
     @Transactional
     public void requestWebHook(WebHookRequestDto request) {
+        log.info("webhook request: {}", request.toString());
         // request에서 document id로 요청 파악
         handleEvent(request);
     }
 
     private void handleEvent(WebHookRequestDto request) {
+        log.info("webhook request: {}", request.toString());
         Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
         EventType eventType = EventType.fromType(request.event().type()); // eventype get
         Apply apply = document.getApply();
@@ -280,11 +283,11 @@ public class DocumentService {
         switch (eventType) {
             case DOCUMENT_STARTED:
                 // 서명 요청 시작
-                System.out.println("DOCUMENT_STARTED");
+                log.info("DOCUMENT_STARTED");
                 break;
             case DOCUMENT_SIGNED:
                 // 서명에 입력
-                System.out.println("DOCUMENT_SIGNED");
+                log.info("DOCUMENT_SIGNED");
                 apply.addStep(); // step 1 증가
 
                 if (apply.getStep() >= 6) {
@@ -295,12 +298,13 @@ public class DocumentService {
                 // FCM 관련
                 if(requesterMethod.equals(employerMethod)) {
                     // 고용주 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    System.out.println(ERequestStepCommentType.getCommentById(apply.getStep()));
-                }
-
-                if(requesterMethod.equals(staffMethod)) {
-                    // 교내유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    System.out.println(ERequestStepCommentType.getCommentById(apply.getStep()));
+                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if(requesterMethod.equals(staffMethod)) {
+                    // 유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else {
+                    // 유학생 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
                 }
 
 
@@ -310,6 +314,25 @@ public class DocumentService {
             case DOCUMENT_ALL_SIGNED:
                 // 문서의 모든 참여자가 서명함.
                 System.out.println("DOCUMENT_ALL_SIGNED");
+
+                apply.addStep(); // step 1 증가
+
+                if (apply.getStep() >= 6) {
+                    // 단계가 완료된 경우 status를 false로
+                    apply.advanceStatus();
+                }
+
+                // FCM 관련
+                if(requesterMethod.equals(employerMethod)) {
+                    // 고용주 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if(requesterMethod.equals(staffMethod)) {
+                    // 유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else {
+                    // 유학생 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                }
+
                 break;
             case DOCUMENT_REJECTED:
                 System.out.println("DOCUMENT_REJECTED");
