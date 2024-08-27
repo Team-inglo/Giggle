@@ -13,6 +13,7 @@ public record UserApplyLogDto(
         @JsonProperty("logs")List<DocumentSpec> logs
         ){
     public record DocumentSpec(
+            @JsonProperty("applyId") Long applyId,
             @JsonProperty("name") String name,
             @JsonProperty("startDate") String startDate,
             @JsonProperty("step") Integer step,

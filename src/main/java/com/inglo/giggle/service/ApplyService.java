@@ -53,6 +53,7 @@ public class ApplyService {
 
         List<UserApplyLogDto.DocumentSpec> documentSpecs = filteredApply.stream()
                 .map(apply -> new UserApplyLogDto.DocumentSpec(
+                        apply.getId(),
                         apply.getAnnouncement().getTitle(),
                         apply.getCreatedAt().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                         apply.getStep(),
