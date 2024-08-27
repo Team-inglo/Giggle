@@ -13,10 +13,13 @@ import com.inglo.giggle.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -96,14 +99,105 @@ public class AnnouncementService {
         double maxDistance = 75.0; // 1시간 30분 이내 거리, 75km
         announcements = announcementRepository.findByOwnerLocationWithin((double)applicant.getAddressX(), (double)applicant.getAddressY(), maxDistance);
 
-        // 근로 시간 계산
+        final int workingHours = calculateWorkingHours(applicant); // 조건에 따른 근로 가능 시간 조회
 
+        // 가능한 근로 시간 이상을 가진 아르바이트만을 가져오기
+        System.out.println(workingHours);
+        announcements = announcements.stream()
+                .filter(announcement -> calculateTotalWorkHours(announcement) <= workingHours)
+                .toList();
 
         // 업직종 계산
-
+        if(Integer.parseInt(applicant.getTopikScore()) < 4) {
+            // 제조업 제외 아르바이트들만 조회(제조업의 경우 TOPIK 4급 이상만 가능) - 단, 사업자등록장에 등록된 제조업은 제외
+            announcements = announcements.stream()
+                    .filter(announcement -> !Objects.equals(announcement.getJobType(), EJobType.MANUDACTURING_INDUSTRY.name()))
+                    .toList();
+        }
 
         return announcements;
     }
+
+    // 조건에 따른 근로 가능 시간 조회
+    private int calculateWorkingHours(Applicant applicant) {
+        int semester = 0; // 실제 이수학기를 추가해야 함
+        int workingHours = 0;
+
+        // 1 ~ 2학년 기본 근로시간 설정
+        if (semester <= 4) { // 1~2학년 조건
+            if (Integer.parseInt(applicant.getTopikScore()) > 2
+                    && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 2
+                    && Integer.parseInt(applicant.getSejongInstituteScore()) > 2) { // 세종학당 중급1 점수
+                if (Float.parseFloat(applicant.getGpa()) > 3.49) { // 우수 장학생
+                    workingHours = 30;
+                } else {
+                    workingHours = 25;
+                }
+            } else {
+                workingHours = 10; // 1~2학년 조건이 안 되는 경우 기본 10시간
+            }
+        }
+
+        // 3~4학년 조건
+        if (semester > 4 && semester <= 8) { // 3~4학년
+            if (Integer.parseInt(applicant.getTopikScore()) > 3
+                    && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 3
+                    && Integer.parseInt(applicant.getSejongInstituteScore()) > 3) { // 세종학당 중급2 점수
+                if (Float.parseFloat(applicant.getGpa()) > 3.49) { // 우수 장학생
+                    workingHours = 30;
+                } else {
+                    workingHours = 25;
+                }
+            } else {
+                workingHours = 10; // 조건 미달 시 10시간
+            }
+        }
+
+        // 석사 이상 조건
+        if (semester > 8) { // 석사 이상
+            if (Integer.parseInt(applicant.getTopikScore()) > 3
+                    && Integer.parseInt(applicant.getSocialIntegrationProgramScore()) > 3
+                    && Integer.parseInt(applicant.getSejongInstituteScore()) > 3) { // 세종학당 중급2
+                if (Float.parseFloat(applicant.getGpa()) > 3.49) { // 우수 장학생
+                    workingHours = 35;
+                } else {
+                    workingHours = 30;
+                }
+            } else {
+                workingHours = 15; // 조건 미달 시 15시간
+            }
+        }
+
+        return workingHours;
+    }
+
+    // 해당 아르바이트의 총 근로시간 조회
+    public long calculateTotalWorkHours(Announcement announcement) {
+        List<WorkDay> workDays = announcement.getWorkDays();
+        long totalMinutes = 0;
+        System.out.println("Total Hours Calculated: " + totalMinutes);
+
+        for (WorkDay workDay : workDays) {
+            // 요일 가져오기
+            DayOfWeek dayOfWeek = workDay.getDay();
+
+            // 월~금에 해당하는 경우만 시간 합 계산
+            if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+                LocalTime startTime = workDay.getWorkStartTime();
+                LocalTime endTime = workDay.getWorkEndTime();
+
+                // 분으로 변환
+                long workMinutes = Duration.between(startTime, endTime).toMinutes();
+                totalMinutes += workMinutes;
+            }
+        }
+
+        // 총 분을 시간으로 변환
+        long totalHours = totalMinutes / 60;
+        System.out.println("Total Hours Calculated: " + totalHours);
+        return totalHours;
+    }
+
 
     // 전체 - 지역으로 분류
     public List<Announcement> filterdRegion(List<String> region, List<Announcement> announcements) {
