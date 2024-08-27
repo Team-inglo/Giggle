@@ -23,6 +23,10 @@ public record WebClientRequestDto(
             @NotNull(message = "참여자 매핑 목록은 null이 될 수 없습니다.")
             List<ParticipantMapping> participantMappings,
 
+            @JsonProperty("requesterInputMappings")
+            @Schema(description = "요청자 데이터 입력 매핑 목록", required = false)
+            List<RequesterInputMapping> requesterInputMappings,
+
             @JsonProperty("title")
             @Schema(description = "문서 제목", example = "시간제취업허가서", required = true)
             @NotNull(message = "문서 제목은 null이 될 수 없습니다.")
@@ -65,6 +69,18 @@ public record WebClientRequestDto(
             String requesterMessage
     ) {}
 
+        // 요청자 데이터 입력 매칭
+        public record RequesterInputMapping(
+                @JsonProperty("dataLabel")
+                @Schema(description = "요청자 데이터 라벨 이름", example = "appicantName", required = false)
+                String dataLabel,
+
+                @JsonProperty("value")
+                @Schema(description = "서명 방법 값", example = "아무말", required = false)
+                String value
+        ) {}
+
+        // 사인 대상자 매핑
     public record SigningMethod(
             @JsonProperty("type")
             @Schema(description = "서명 방법 타입", example = "EMAIL", required = true)

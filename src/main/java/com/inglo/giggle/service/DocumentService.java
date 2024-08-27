@@ -7,6 +7,7 @@ import com.inglo.giggle.dto.request.WebHookRequestDto;
 import com.inglo.giggle.dto.response.WebClientEmbeddedResponseDto;
 import com.inglo.giggle.dto.response.WebClientResponseDto;
 import com.inglo.giggle.dto.type.EDocumentType;
+import com.inglo.giggle.dto.type.ERequestStepCommentType;
 import com.inglo.giggle.dto.type.EventType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
@@ -15,13 +16,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.inglo.giggle.dto.type.EDocumentType.TIME_WORK_PERMIT;
 
 @Service
 @RequiredArgsConstructor
@@ -76,13 +81,64 @@ public class DocumentService {
 
         WebClientRequestDto.Document document = new WebClientRequestDto.Document(
                 participantMappings,
+                null,
                 type.getTitle()
         );
+
+        // 시간제 취업허가서의 경우 넣어야하는 요청자 데이터 필드
+        if (type.equals(EDocumentType.TIME_WORK_PERMIT)) {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "applicantName", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "applicantRegistrationNumber", applicant.getRegistrationNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreName", announcement.getOwner().getStoreName());
+            addRequesterInputMapping(requesterInputMappings, "ownerRegistrationNumber", announcement.getOwner().getOwnerRegistrationNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreAddressName", announcement.getOwner().getStoreAddressName());  // 값 없이 추가
+            addRequesterInputMapping(requesterInputMappings, "ownerName", ownerName);
+            addRequesterInputMapping(requesterInputMappings, "ownerStorePhoneNumber", announcement.getOwner().getStorePhoneNumber());
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+
+        }   else if(type.equals(EDocumentType.EMPLOYMENT_CONTRACT)) {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreName", announcement.getOwner().getStoreName());
+            addRequesterInputMapping(requesterInputMappings, "ownerStorePhoneNumber", announcement.getOwner().getStorePhoneNumber());
+            addRequesterInputMapping(requesterInputMappings, "ownerStoreAddressName", announcement.getOwner().getStoreAddressName());
+            addRequesterInputMapping(requesterInputMappings, "ownerName", ownerName);
+            addRequesterInputMapping(requesterInputMappings, "ownerRegistrationNumber", announcement.getOwner().getOwnerRegistrationNumber());  // 값 없이 추가
+            addRequesterInputMapping(requesterInputMappings, "applicantName", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "applicantDateOfBirth", applicant.getDateOfBirth());
+            addRequesterInputMapping(requesterInputMappings, "applicantName2", applicantName);
+            addRequesterInputMapping(requesterInputMappings, "ownerName2", ownerName);
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+        } else {
+            List<WebClientRequestDto.RequesterInputMapping> requesterInputMappings = new ArrayList<>();
+            addRequesterInputMapping(requesterInputMappings, "selectApplication", "V");
+
+            // 기존 Document 객체에 새로운 requesterInputMappings를 적용하여 다시 생성합니다.
+            document = new WebClientRequestDto.Document(
+                    document.participantMappings(),
+                    requesterInputMappings,  // 여기서 새로운 requesterInputMappings를 설정합니다.
+                    document.title()
+            );
+        }
 
         WebClientRequestDto requestDto = new WebClientRequestDto(
                 document,
                 type.getTemplateId() // template id
         );
+
+        System.out.println(requestDto);
 
         WebClientResponseDto responseDto = webClient.post()
                 .uri("/documents/request-with-template")
@@ -116,6 +172,12 @@ public class DocumentService {
         return embeddedUrl;
     }
 
+    private void addRequesterInputMapping(List<WebClientRequestDto.RequesterInputMapping> mappings, String dataLabel, String value) {
+        if (value != null && !value.isEmpty()) {
+            mappings.add(new WebClientRequestDto.RequesterInputMapping(dataLabel, value));
+        }
+    }
+
     private String getembeddedUrl(String documentId, String participantId) {
         String url = String.format("/documents/%s/participants/%s/embedded-view?redirectUrl=%s", documentId, participantId, "https://github.com/bianbbc87"); // redirect url 추가
 
@@ -138,6 +200,8 @@ public class DocumentService {
         return responseDto.embeddedUrl();
     }
 
+
+
     private void addApply(WebClientResponseDto request, Long announcementId, EDocumentType documentType, Long userId, Applicant applicant, Announcement announcement) {
 
         Apply apply = Apply.builder()
@@ -151,7 +215,7 @@ public class DocumentService {
         try {
             applyRepository.save(apply);
             // document 추가
-            addDocumentForApply(apply, documentType, request.id());
+            addDocumentForApply(apply, documentType, request.id(), request.participants().get(1).signingMethod().value(), "");
 
         } catch(DataAccessException e) {
             throw new CommonException(ErrorCode.APPLY_DATABASE_ERROR);
@@ -168,7 +232,11 @@ public class DocumentService {
         } else {
             // 기존 Apply 객체에 문서 추가
             try {
-                addDocumentForApply(apply, documentType, request.id());
+                if (documentType.equals(TIME_WORK_PERMIT)) {
+                    addDocumentForApply(apply, documentType, request.id(), request.participants().get(1).signingMethod().value(), request.participants().get(2).signingMethod().value());
+                } else {
+                    addDocumentForApply(apply, documentType, request.id(), "", "");
+                }
                 applyRepository.save(apply);
             } catch (DataAccessException e) {
                 throw new CommonException(ErrorCode.APPLY_DATABASE_ERROR);
@@ -177,11 +245,13 @@ public class DocumentService {
     }
 
     // apply의 document 추가 method
-    private void addDocumentForApply(Apply apply, EDocumentType documentType, String documentId) {
+    private void addDocumentForApply(Apply apply, EDocumentType documentType, String documentId, String employerMethod, String staffMethod) {
         Document document = Document.builder()
                 .apply(apply)
                 .type(documentType)
                 .documentId(documentId)
+                .employerMethod(employerMethod)
+                .staffMethod(staffMethod)
                 .build();
 
         try {
@@ -195,13 +265,18 @@ public class DocumentService {
     @Transactional
     public void requestWebHook(WebHookRequestDto request) {
         // request에서 document id로 요청 파악
-        Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
-        EventType eventType = EventType.fromType(request.event().type()); // eventype get
-        handleEvent(eventType, document);
+        handleEvent(request);
     }
 
-    private void handleEvent(EventType eventType, Document document) {
+    private void handleEvent(WebHookRequestDto request) {
+        Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
+        EventType eventType = EventType.fromType(request.event().type()); // eventype get
         Apply apply = document.getApply();
+
+        String requesterMethod = request.document().requester().email(); // request 요청 당사자 이메일
+        String employerMethod = document.getEmployerMethod(); // 등록된 고용주 이메일
+        String staffMethod = document.getStaffMethod(); // 등록된 교내유학생담당자 이메일
+
         switch (eventType) {
             case DOCUMENT_STARTED:
                 // 서명 요청 시작
@@ -216,6 +291,18 @@ public class DocumentService {
                     // 단계가 완료된 경우 status를 false로
                     apply.advanceStatus();
                 }
+
+                // FCM 관련
+                if(requesterMethod.equals(employerMethod)) {
+                    // 고용주 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    System.out.println(ERequestStepCommentType.getCommentById(apply.getStep()));
+                }
+
+                if(requesterMethod.equals(staffMethod)) {
+                    // 교내유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
+                    System.out.println(ERequestStepCommentType.getCommentById(apply.getStep()));
+                }
+
 
                 applyRepository.save(apply);
 

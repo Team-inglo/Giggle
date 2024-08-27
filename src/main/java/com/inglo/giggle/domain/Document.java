@@ -27,11 +27,21 @@ public class Document {
     @Column(name = "document_type_id", nullable = false)
     private String documentId;
 
+    @Column(name = "employer_email", nullable = true)
+    private String employerMethod;
+
+    @Column(name = "staff_email", nullable = true)
+    private String staffMethod; // 교내유학생담당자 이메일
+
+
+
     @Builder
-    public Document(Apply apply, EDocumentType type, String documentId){
+    public Document(Apply apply, EDocumentType type, String documentId, String employerMethod, String staffMethod){
         this.apply = apply;
         this.type = type;
         this.documentId = documentId;
+        this.employerMethod = employerMethod;
+        this.staffMethod = staffMethod;
     }
 
 }
