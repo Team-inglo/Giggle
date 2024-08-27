@@ -100,7 +100,7 @@ public class ApplyService {
     }
 
     private String getViewEmbeddedUrl(String documentId) {
-        String url = String.format("/documents/%s/embedded-view?redirectUrl=%s", documentId, "https://github.com/bianbbc87"); // redirect url 추가
+        String url = String.format("/documents/%s/embedded-view?redirectUrl=%s", documentId, "https://giggle-inglo.com/document"); // redirect url 추가
 
         WebClientEmbeddedResponseDto responseDto = webClient.get()
                 .uri(url)
