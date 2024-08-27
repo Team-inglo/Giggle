@@ -27,6 +27,14 @@ public class Document {
     @Column(name = "document_type_id", nullable = false)
     private String documentId;
 
+    @Column(name = "employer_email", nullable = true)
+    private String employerEmail;
+
+    @Column(name = "staff_email", nullable = true)
+    private String staffEmail; // 교내유학생담당자 이메일
+
+
+
     @Builder
     public Document(Apply apply, EDocumentType type, String documentId){
         this.apply = apply;
