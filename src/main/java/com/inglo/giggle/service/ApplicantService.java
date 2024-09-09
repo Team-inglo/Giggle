@@ -85,19 +85,42 @@ public class ApplicantService {
             for (String line : lines) {
                 int index = Arrays.asList(lines).indexOf(line);
 
-                if (line.contains("여권번호/ Passport No.")) {
-                    passportNumber = lines[index + 2].trim(); // 여권번호는 "Passport No." 다다음 줄에서 추출
-                } else if (line.contains("이름/Given names")) {
-                    name = lines[index + 1].trim(); // 이름은 "Given names" 다음 줄에서 추출
-                } else if (line.contains("성별/Sex")) {
-                    sex = lines[index + 1].trim(); // 성별은 "Sex" 다음 줄에서 추출
-                } else if (line.contains("국적/ Nationality")) {
-                    nationality = lines[index + 1].trim(); // 국적은 "Nationality" 다음 줄에서 추출
-                } else if (line.contains("발급일/ Date of issue")) {
-                    passportIssueDate = formatDate(lines[index + 1].trim()); // 발급일은 "Date of issue" 다음 줄에서 추출
-                    passportExpiryDate = formatDate(lines[index + 2].trim()); // 만료일은 발급일 바로 다음 줄에서 추출
-                } else if (line.contains("기간만료일/ Date of expirty")) {
-                    dob = formatDate(lines[index + 1].trim()); // 만료일은 "Date of expiry" 다음 줄에서 추출
+                if (line.matches("^[A-Z0-9]{9,16}$")) {
+                    passportNumber = line;
+                } else if (line.matches("^(?=.*[A-Z]{2,})(?=.*<.{2,}).+$")) { // 이름
+                    // 6번째 인덱스부터 첫 <가 나오기 전까지의 영대문자들을 추출하여 surname으로 설정
+                    int startIndex = 5;
+                    int endIndex = line.indexOf('<', startIndex);
+
+                    if (endIndex != -1) {
+                        String surName = line.substring(startIndex, endIndex).replaceAll("[^A-Z]", "").trim();
+                        // surName을 사용할 코드 작성
+
+                        // << 이후 이름 추출
+                        String remaining = line.substring(endIndex);
+                        String[] nameParts = remaining.split("<+");
+                        StringBuilder givenNameBuilder = new StringBuilder();
+
+                        for (int i = 1; i < nameParts.length; i++) { // nameParts[0]는 빈 문자열이므로 무시
+                            if (!nameParts[i].isEmpty()) {
+                                if (!givenNameBuilder.isEmpty()) {
+                                    givenNameBuilder.append(" "); // < 하나가 있으면 띄어쓰기
+                                }
+                                givenNameBuilder.append(nameParts[i].replaceAll("[^A-Z]", "")); // 이름 부분에서 영대문자만 남김
+                            }
+                        }
+                        name = surName + " " + givenNameBuilder.toString().trim();
+                    }
+                } else if (line.matches("^(?=.*[A-Z])(?=.*\\d)[A-Z0-9< ]{30,}$") && (passportNumber != null)) {
+                    nationality = line.substring(passportNumber.length() + 1, passportNumber.length() + 4);
+                    dob = line.substring(passportNumber.length() + 4, passportNumber.length() + 10).trim();
+                    sex = line.substring(passportNumber.length() + 12, passportNumber.length() + 13).trim();
+                    passportExpiryDate = line.substring(passportNumber.length() + 13, passportNumber.length() + 19).trim();
+                    if ((Integer.parseInt(passportExpiryDate.substring(0, 2)) - 10) >= 0) {
+                        passportIssueDate = Integer.parseInt(passportExpiryDate.substring(0, 2)) - 10 + passportExpiryDate.substring(2, 6);
+                    } else {
+                        passportIssueDate = 100 + (Integer.parseInt(passportExpiryDate.substring(0, 2)) - 10) + passportExpiryDate.substring(2, 6);
+                    }
                 }
             }
             if (passportNumber == null || name == null || sex == null || dob == null || nationality == null || passportIssueDate == null || passportExpiryDate == null) {
@@ -112,6 +135,13 @@ public class ApplicantService {
                 imageUtil.deleteImageFile(currentPassportFileUrl);
                 throw new CommonException(ErrorCode.INVALID_PASSPORT_FILE, "Missing Fields: " + missingFields.toString());
             }
+            log.info("Passport Number: {}", passportNumber);
+            log.info("Name: {}", name);
+            log.info("Sex: {}", sex);
+            log.info("Date of Birth: {}", dob);
+            log.info("Nationality: {}", nationality);
+            log.info("Passport Issue Date: {}", passportIssueDate);
+            log.info("Passport Expiry Date: {}", passportExpiryDate);
             return PassportDto.builder()
                     .passportNumber(passportNumber)
                     .name(name)
@@ -177,15 +207,15 @@ public class ApplicantService {
             for (String line : lines) {
                 int index = Arrays.asList(lines).indexOf(line);
 
-                if (line.contains("외국인등록번호")) {
-                    // "외국인등록번호" 줄에서 추출
-                    registrationNumber = line.substring(line.indexOf("외국인등록번호") + 7).trim();
-                } else if (line.contains("체류자격")) {
-                    // "체류자격" 줄에서 추출
-                    statusOfResidence = line.substring(line.indexOf("체류자격") + 4).trim();
-                } else if (line.contains("발급일자")) {
-                    // "발급일자 Issue Date" 문자열 내에서 발급일을 추출
-                    registrationIssueDate = line.substring(line.indexOf("발급일자 Issue Date") + 15).trim();
+                if (line.matches(".*\\d{6}-\\d{7}.*")) {
+                    // nnnnnn-nnnnnnn 형식의 등록번호를 포함하는 줄에서 등록번호만 추출
+                    registrationNumber = line.replaceAll(".*(\\d{6}-\\d{7}).*", "$1").trim();
+                } else if (line.matches(".*[가-힣]{1}[가-힣]{1}\\(D-\\d{1}\\).*")) {
+                    // 한글 2자와 (D-숫자1자)로 구성된 체류자격만 추출
+                    statusOfResidence = line.replaceAll(".*([가-힣]{1}[가-힣]{1}\\(D-\\d{1}\\)).*", "$1").trim();
+                } else if (line.matches(".*(\\d{4}\\.\\d{2}\\.\\d{2}\\.).*")) {
+                    // 발급일자만 추출
+                    registrationIssueDate = line.replaceAll(".*(\\d{4}\\.\\d{2}\\.\\d{2}\\.).*", "$1").trim();
                 }
             }
 
@@ -275,15 +305,15 @@ public class ApplicantService {
             // fullTextAnnotation 객체 가져오기
             JSONObject fullTextAnnotation = (JSONObject) responses.get("fullTextAnnotation");
             String text = (String) fullTextAnnotation.get("text");
-
+            log.info(text);
             // 텍스트를 줄 단위로 분리
             String[] lines = text.split("\n");
             String socialIntegrationProgramScore = null;
 
             for (String line : lines) {
                 int index = Arrays.asList(lines).indexOf(line);
-                if (line.equals("교육")) {
-                    socialIntegrationProgramScore = lines[index + 1].trim();
+                if (line.matches("\\d")) {
+                    socialIntegrationProgramScore = line;
                 }
             }
             if (socialIntegrationProgramScore == null) {
@@ -306,6 +336,7 @@ public class ApplicantService {
     public String extractFromSejongInstitute(Long userId, MultipartFile file) {
         Applicant applicant = applicantRepository.findById(userId)
                 .orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_APPLICANT));
+        log.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Multipart:{}", file);
         try {
             String base64Image = imageUtil.encodeImageToBase64(file);
             String jsonResponse = callGoogleVisionApi(base64Image);
@@ -324,23 +355,34 @@ public class ApplicantService {
 
             for (String line : lines) {
                 int index = Arrays.asList(lines).indexOf(line);
-                if (line.contains("Total Score")) {
-                    sejongInstituteScore = lines[index + 3].substring(0,3).trim();
+                if (line.matches("\\d{1,3}/800")) {
+                    // 이 줄이 nnn/800 형식에 맞는지 확인하고, 맞다면 이곳에서 처리
+                    sejongInstituteScore = line;
                 }
             }
             if (sejongInstituteScore == null) {
                 throw new CommonException(ErrorCode.INVALID_SEJONG_INSTITUTE_FILE, "Missing Fields: sejongInstituteScore");
             } else {
-                if(Integer.parseInt(sejongInstituteScore)<108) sejongInstituteScore = "0";
-                else if(Integer.parseInt(sejongInstituteScore)<216) sejongInstituteScore = "1";
-                else if(Integer.parseInt(sejongInstituteScore)<296) sejongInstituteScore = "2";
-                else if(Integer.parseInt(sejongInstituteScore)<401) sejongInstituteScore = "3";
-                else if(Integer.parseInt(sejongInstituteScore)<496) sejongInstituteScore = "4";
-                else if(Integer.parseInt(sejongInstituteScore)<581) sejongInstituteScore = "5";
-                else sejongInstituteScore = "6";
+                Integer score = Integer.parseInt(sejongInstituteScore.split("/")[0]);
+                if (score < 108) {
+                    sejongInstituteScore = "0";
+                } else if (score < 216) {
+                    sejongInstituteScore = "1";
+                } else if (score < 296) {
+                    sejongInstituteScore = "2";
+                } else if (score < 401) {
+                    sejongInstituteScore = "3";
+                } else if (score < 496) {
+                    sejongInstituteScore = "4";
+                } else if (score < 581) {
+                    sejongInstituteScore = "5";
+                } else {
+                    sejongInstituteScore = "6";
+                }
             }
             return sejongInstituteScore;
         } catch (Exception e) {
+            log.error("Sejong Institute file parsing error", e);
             throw new CommonException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
