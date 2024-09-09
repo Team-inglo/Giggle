@@ -21,6 +21,8 @@ public record AuthSignUpDto(
         String password,
         @JsonProperty("role") @Schema(description = "역할", example = "APPLICANT")
         @NotNull(message = "role은 null이 될 수 없습니다.")
-        String role
+        String role,
+        @JsonProperty("device_token") @Schema(description = "디바이스 토큰", example = "example_token")
+        String deviceToken
 ) {
 }

@@ -12,6 +12,7 @@ import com.inglo.giggle.dto.type.EventType;
 import com.inglo.giggle.exception.CommonException;
 import com.inglo.giggle.exception.ErrorCode;
 import com.inglo.giggle.repository.*;
+import com.inglo.giggle.utility.FcmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class DocumentService {
     private final ApplyRepository applyRepository;
     private final AnnouncementRepository announcementRepository;
     private final ApplicantRepository applicantRepository;
+    private final FcmUtil fcmUtil;
 
     private final WebClient webClient = WebClient.builder().baseUrl("https://api.modusign.co.kr").build();
 
@@ -264,17 +267,19 @@ public class DocumentService {
 
     // 모두싸인에서 보내는 post용 api
     @Transactional
-    public void requestWebHook(WebHookRequestDto request) {
+    public void requestWebHook(WebHookRequestDto request) throws IOException {
         log.info("webhook request: {}", request.toString());
         // request에서 document id로 요청 파악
         handleEvent(request);
     }
 
-    private void handleEvent(WebHookRequestDto request) {
+    private void handleEvent(WebHookRequestDto request) throws IOException {
         log.info("webhook request: {}", request.toString());
         Document document = documentRepository.findByDocumentId(request.document().id()).orElseThrow(() -> new CommonException(ErrorCode.NOT_FOUND_DOCUMENT));
         EventType eventType = EventType.fromType(request.event().type()); // eventype get
         Apply apply = document.getApply();
+        Applicant applicant = apply.getApplicant();
+        User user = applicant.getUser();
 
         String requesterMethod = request.document().requester().email(); // request 요청 당사자 이메일
         String employerMethod = document.getEmployerMethod(); // 등록된 고용주 이메일
@@ -296,24 +301,22 @@ public class DocumentService {
                 }
 
                 // FCM 관련
-                if(requesterMethod.equals(employerMethod)) {
-                    // 고용주 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
-                } else if(requesterMethod.equals(staffMethod)) {
-                    // 유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
-                } else {
-                    // 유학생 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
+                if(requesterMethod.equals(employerMethod) && apply.getStep() == 2) {
+                    // 고용주가 표준 근로계약서 서명을 완료했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 업데이트 되었어요!", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if(requesterMethod.equals(employerMethod) && apply.getStep() == 4) {
+                    // 고용주가 시간제 취업 허가서 서명을 완료했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 업데이트 되었어요!", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if(requesterMethod.equals(staffMethod) && apply.getStep() == 5) {
+                    // 고용주와 유학생 담당자가 모두 시간제 취업 허가서 서명을 완료했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 업데이트 되었어요!", ERequestStepCommentType.getCommentById(apply.getStep()));
                 }
-
 
                 applyRepository.save(apply);
 
                 break;
             case DOCUMENT_ALL_SIGNED:
                 // 문서의 모든 참여자가 서명함.
-                System.out.println("DOCUMENT_ALL_SIGNED");
 
                 apply.addStep(); // step 1 증가
 
@@ -323,27 +326,36 @@ public class DocumentService {
                 }
 
                 // FCM 관련
-                if(requesterMethod.equals(employerMethod)) {
-                    // 고용주 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
-                } else if(requesterMethod.equals(staffMethod)) {
-                    // 유학생담당자 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                    log.info(ERequestStepCommentType.getCommentById(apply.getStep()));
-                } else {
-                    // 유학생 알림 전송, 메시지는 apply의 step과 연결된 메시지
-                }
+                fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 업데이트 되었어요!", ERequestStepCommentType.getCommentById(apply.getStep()));
 
                 break;
             case DOCUMENT_REJECTED:
-                System.out.println("DOCUMENT_REJECTED");
                 // 참여자가 서명 요청을 거절함.
+                if (requesterMethod.equals(employerMethod) && apply.getStep() == 1) {
+                    // 고용주가 표준 근로계약서 서명을 거절했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if (requesterMethod.equals(employerMethod) && apply.getStep() == 3) {
+                    // 고용주가 시간제 취업허가서 서명을 거절했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if (requesterMethod.equals(staffMethod) && apply.getStep() == 4) {
+                    // 유학생 담당자가 서명을 거절했을 때, 고용주에게 알림 전송
+                    fcmUtil.sendMessageTo(employerMethod, "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                }
                 break;
             case DOCUMENT_REQUEST_CANCELED:
-                System.out.println("DOCUMENT_SIGNED");
-                // 문서의 서명 요청이 취소됨.
+                // 참여자가 서명 요청을 거절함.
+                if (requesterMethod.equals(employerMethod) && apply.getStep() == 1) {
+                    // 고용주가 표준 근로계약서 서명을 거절했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if (requesterMethod.equals(employerMethod) && apply.getStep() == 3) {
+                    // 고용주가 시간제 취업허가서 서명을 거절했을 때, 유학생에게 알림 전송
+                    fcmUtil.sendMessageTo(user.getDeviceToken(), "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                } else if (requesterMethod.equals(staffMethod) && apply.getStep() == 4) {
+                    // 유학생 담당자가 서명을 거절했을 때, 고용주에게 알림 전송
+                    fcmUtil.sendMessageTo(employerMethod, "서류가 거절되었어요...", ERequestStepCommentType.getCommentById(apply.getStep()));
+                }
                 break;
             case DOCUMENT_SIGNGING_CANCELED:
-                System.out.println("DOCUMENT_SIGNGING_CANCELED");
                 // 참여자가 입력한 서명을 취소함.
                 break;
             default:
