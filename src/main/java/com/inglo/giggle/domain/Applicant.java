@@ -100,19 +100,19 @@ public class Applicant {
                 .build();
     }
     public void updateApplicant(UpdateApplicantDto updateApplicantDto) {
-        if (updateApplicantDto.addressName() != null && (!this.addressName.equals(updateApplicantDto.addressName())))
+        if (updateApplicantDto.addressName() != null)
             this.addressName = updateApplicantDto.addressName();
-        if (updateApplicantDto.addressX() != null && (!this.addressX.equals(updateApplicantDto.addressX())))
+        if (updateApplicantDto.addressX() != null)
             this.addressX = updateApplicantDto.addressX();
-        if (updateApplicantDto.addressY() != null && (!this.addressY.equals(updateApplicantDto.addressY())))
+        if (updateApplicantDto.addressY() != null)
             this.addressY = updateApplicantDto.addressY();
-        if (updateApplicantDto.gpa() != null && (!this.gpa.equals(updateApplicantDto.gpa())))
+        if (updateApplicantDto.gpa() != null)
             this.gpa = updateApplicantDto.gpa();
-        if (updateApplicantDto.startDay() != null && (!this.startDay.equals(updateApplicantDto.startDay())))
+        if (updateApplicantDto.startDay() != null)
             this.startDay = updateApplicantDto.startDay();
-        if (updateApplicantDto.endDay() != null && (!this.endDay.equals(updateApplicantDto.endDay())))
+        if (updateApplicantDto.endDay() != null)
             this.endDay = updateApplicantDto.endDay();
-        if (updateApplicantDto.semester() != null && (!this.semester.equals(updateApplicantDto.semester())))
+        if (updateApplicantDto.semester() != null)
             this.semester = updateApplicantDto.semester();
     }
 
