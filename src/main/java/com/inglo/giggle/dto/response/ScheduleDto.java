@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record ScheduleDto(
         Long id,
         String partTimeName,
+        String partTimeColor,
         Integer hourlyRate,
         LocalDateTime startAt,
         LocalDateTime endAt
