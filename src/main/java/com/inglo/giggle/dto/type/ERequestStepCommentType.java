@@ -12,7 +12,7 @@ public enum ERequestStepCommentType {
     EMPLOYER_WRITE_LABOR_CONTRACT(1, "고용주가 표준 근로계약서를 확인 중이에요."),
     ME_WRITE_PARTTIME_PERMITT(2, "고용주가 표준 근로계약서를 작성 완료했어요. 시간제 취업허가서를 작성해주세요."),
     EMPLOYER_WRITE_PARTTIME_PERMIT(3, "고용주가 시간제 취업허가서를 확인 중이에요."),
-    COLLAGE_WRITE_PARTTIME_PERMIT(4, "유학생 담당자가 시간제 취업허가서를 확인 중이에요."),
+    COLLAGE_WRITE_PARTTIME_PERMIT(4, "고용주가 시간제 취업허가서를 작성 완료했어요. 유학생 담당자가 시간제 취업허가서를 확인 중이에요."),
     ME_WRITE_CONSOLIDATION(5, "고용주와 유학생 담당자가 시간제 취업허가서 작성을 완료했어요. 통합신청서를 작성해주세요."),
     COMPLETE_DOCUMENT(6, "모든 서류 작성을 완료했습니다. 서류 내용을 검토한 후 전자민원을 신청해주세요."),
 

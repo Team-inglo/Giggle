@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -35,7 +36,7 @@ public class DocumentController {
     @Operation(summary = "웹훅용 api", description = "웹훅용 api")
     public void requestSignature(
             @RequestBody WebHookRequestDto request
-            ) {
+            ) throws IOException {
         documentService.requestWebHook(request);
     }
 }

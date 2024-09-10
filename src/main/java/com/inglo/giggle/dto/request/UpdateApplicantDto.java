@@ -15,10 +15,8 @@ public record UpdateApplicantDto(
         @JsonProperty("gpa")
         String gpa,
         @JsonProperty("startDay")
-        @Date
         LocalDateTime startDay,
         @JsonProperty("endDay")
-        @Date
         LocalDateTime endDay,
         @JsonProperty("semester")
         Integer semester

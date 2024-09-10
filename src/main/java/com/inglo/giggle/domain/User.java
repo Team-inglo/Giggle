@@ -47,14 +47,18 @@ public class User {
     @Column(name = "refresh_token")
     private String refreshToken;
 
+    @Column(name = "device_token")
+    private String deviceToken;
+
     @Builder
-    public User(String serialId, String password, EProvider provider, ERole role) {
+    public User(String serialId, String password, EProvider provider, ERole role, String deviceToken) {
         this.serialId = serialId;
         this.password = password;
         this.provider = provider;
         this.role = role;
         this.createdAt = LocalDateTime.now();
         this.isLogin = false;
+        this.deviceToken = deviceToken;
     }
 
     public void updateRefreshToken(String refreshToken) {
@@ -67,6 +71,7 @@ public class User {
                 .password(encodedPassword)
                 .provider(EProvider.DEFAULT)
                 .role(role)
+                .deviceToken(authSignUpDto.deviceToken())
                 .build();
     }
 }
