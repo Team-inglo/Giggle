@@ -1,16 +1,18 @@
 ---
-name: "[ Feature ] - 작업할 것"
+name: "✨ Feature - 작업할 것"
 about: "✨ Feature Template "
-title: "[ Feature ] - "
-labels: feature
+title: "✨ Feature - "
+labels: ✨ Feature
 assignees: ''
 
 ---
 
-## 🛠️ 개발 예정 기능
+## 🛠️ Issue Description
+[//]: # (이슈 설명)
 
-## 💭 해당 기능 역할
+## 💭 Functional role
+[//]: # (해당 기능 역할)
 
 ### 📝 check-lists
-
-- [ ]
+[//]: # (체크리스트 설정)
+- [ ] Task1
